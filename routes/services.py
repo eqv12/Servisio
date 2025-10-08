@@ -1,29 +1,37 @@
 """
-services.py - Admin/Technician Service Request Management Blueprint
+routes/services.py
+-------------------
+Admin / Technician Module – Service Request Management
 
 Purpose:
-    CRUD operations for service requests.
+    Displays all service requests from the database.
+    This completes Step 3 of the Admin Module: Read Operations.
 
 Responsibilities:
-    - View, add, edit, and delete service requests
-    - Provide dummy data for frontend
+    - Query all service requests
+    - Render list in admin/services.html
 """
 
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template
+from models import db, ServiceRequest
 
-services_bp = Blueprint('services', __name__)
+services_bp = Blueprint('services', __name__, url_prefix='/admin/services')
+
 
 @services_bp.route('/')
 def list_services():
-    """List all service requests (dummy)."""
-    dummy_services = [
-        {"id": 1, "title": "Request VPN access", "status": "Pending"},
-        {"id": 2, "title": "Request new keyboard", "status": "Approved"}
-    ]
-    return render_template('admin/services.html', services=dummy_services)
+    """
+    List all service requests from DB.
+    """
+    services = ServiceRequest.query.order_by(ServiceRequest.created_at.desc()).all()
+    return render_template('admin/services.html', services=services)
 
-@services_bp.route('/<int:service_id>')
-def view_service(service_id):
-    """View a specific service request (dummy)."""
-    service = {"id": service_id, "title": "Request VPN access", "status": "Pending"}
-    return render_template('admin/service_detail.html', service=service)
+
+
+"""
+Developer Notes:
+----------------
+- ServiceRequest model fields expected: id, title, description, status, request_type, created_at, requested_by
+- Add empty-state handling in template
+- Later steps will add create/update/delete routes
+"""
