@@ -1,29 +1,91 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard - Servisio{% endblock %}
+{% block title %}Dashboard - Servisio{% endblock %}
 {% block content %}
-<h2>Admin Dashboard</h2>
-<p>Total Tickets: {{ stats.total_tickets }}</p>
-<p>Open: {{ stats.open_tickets }}</p>
-<p>Resolved: {{ stats.resolved_tickets }}</p>
-<p>Average Resolution Time: {{ stats.avg_resolution_time }}</p>
 
-<canvas id="ticketChart" width="400" height="200"></canvas>
+<div class="container mt-4">
+  <h2 class="mb-4">Admin Dashboard</h2>
+
+  <!-- Stats Cards -->
+  <div class="row text-center mb-4">
+    <div class="col-md-3">
+      <div class="card bg-primary text-white shadow-sm">
+        <div class="card-body">
+          <h5>Total Tickets</h5>
+          <h2>{{ stats.total_tickets }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-warning text-dark shadow-sm">
+        <div class="card-body">
+          <h5>Open / Pending</h5>
+          <h2>{{ stats.open_tickets }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-success text-white shadow-sm">
+        <div class="card-body">
+          <h5>Resolved</h5>
+          <h2>{{ stats.resolved_tickets }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-info text-white shadow-sm">
+        <div class="card-body">
+          <h5>Avg Resolution Time</h5>
+          <h2>{{ stats.avg_resolution_time }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title text-center">Incident Status Distribution</h5>
+          <canvas id="incidentChart" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title text-center">Service Request Status Distribution</h5>
+          <canvas id="serviceChart" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-fetch("{{ url_for('dashboard.dashboard_data') }}")
-  .then(res => res.json())
-  .then(data => {
-      const ctx = document.getElementById('ticketChart');
-      new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-              labels: data.labels,
-              datasets: [{ data: data.values }]
-          }
+  fetch("{{ url_for('dashboard.dashboard_data') }}")
+    .then(res => res.json())
+    .then(data => {
+      new Chart(document.getElementById('incidentChart'), {
+        type: 'doughnut',
+        data: {
+          labels: data.incident_labels,
+          datasets: [{ data: data.incident_values }]
+        }
       });
-  });
+
+      new Chart(document.getElementById('serviceChart'), {
+        type: 'doughnut',
+        data: {
+          labels: data.service_labels,
+          datasets: [{ data: data.service_values }]
+        }
+      });
+    });
 </script>
-{% endblock %}
 {% endblock %}

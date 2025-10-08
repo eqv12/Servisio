@@ -32,9 +32,18 @@ Usage:
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Tickets</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Knowledge Base</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
+                    <!-- Tickets Dropdown -->
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Tickets
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ticketsDropdown">
+    <li><a class="dropdown-item" href="{{ url_for('incidents.list_incidents') }}">Incidents</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('services.list_services') }}">Service Requests</a></li>
+  </ul>
+</li>
+                    <li class="nav-item"><a class="nav-link" href="/kb">Knowledge Base</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
                 </ul>
             </div>
@@ -43,6 +52,17 @@ Usage:
 
     <!-- Main Content -->
     <main class="container mt-4">
+          <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show mt-2" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
         {% block content %}{% endblock %}
     </main>
 
