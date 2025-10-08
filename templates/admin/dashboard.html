@@ -68,24 +68,62 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  fetch("{{ url_for('dashboard.dashboard_data') }}")
-    .then(res => res.json())
-    .then(data => {
-      new Chart(document.getElementById('incidentChart'), {
-        type: 'doughnut',
-        data: {
-          labels: data.incident_labels,
-          datasets: [{ data: data.incident_values }]
-        }
-      });
+  const incidentCtx = document.getElementById('incidentChart');
+  const serviceCtx = document.getElementById('serviceChart');
 
-      new Chart(document.getElementById('serviceChart'), {
-        type: 'doughnut',
-        data: {
-          labels: data.service_labels,
-          datasets: [{ data: data.service_values }]
-        }
+  const incidentChart = new Chart(incidentCtx, {
+    type: 'doughnut',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: ['#0d6efd', '#ffc107', '#198754']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+
+  const serviceChart = new Chart(serviceCtx, {
+    type: 'doughnut',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: ['#6c757d', '#0dcaf0', '#20c997', '#198754']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+
+  // Fetch live data and update both charts
+  function updateCharts() {
+    fetch("{{ url_for('dashboard.dashboard_data') }}")
+      .then(res => res.json())
+      .then(data => {
+        // Incidents
+        incidentChart.data.labels = data.incident_labels;
+        incidentChart.data.datasets[0].data = data.incident_values;
+        incidentChart.update();
+
+        // Services
+        serviceChart.data.labels = data.service_labels;
+        serviceChart.data.datasets[0].data = data.service_values;
+        serviceChart.update();
       });
-    });
+  }
+
+  // Initial load + auto-refresh every 30s
+  updateCharts();
+  setInterval(updateCharts, 30000);
 </script>
 {% endblock %}

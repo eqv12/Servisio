@@ -1,33 +1,43 @@
-"""
-routes/dashboard.py
--------------------
-Admin / Technician Dashboard Module
-
-Purpose:
-    Displays live analytics and key metrics for incidents and service requests.
-    Provides a JSON endpoint for charts (used by Chart.js on the frontend).
-"""
-
 from flask import Blueprint, render_template, jsonify
 from models import db, Incident, ServiceRequest
+from datetime import datetime
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/admin/dashboard')
 
 
 @dashboard_bp.route('/')
 def dashboard_home():
-    """Render dashboard page with live ticket stats."""
+    """Render dashboard page with live ticket stats + avg resolution time."""
     total_incidents = Incident.query.count()
     total_services = ServiceRequest.query.count()
 
     open_tickets = Incident.query.filter_by(status='Open').count() + ServiceRequest.query.filter_by(status='Pending').count()
     resolved_tickets = Incident.query.filter_by(status='Resolved').count() + ServiceRequest.query.filter_by(status='Resolved').count()
 
+    # Calculate average resolution time for resolved tickets
+    resolved_incidents = Incident.query.filter_by(status='Resolved').all()
+    resolved_services = ServiceRequest.query.filter_by(status='Resolved').all()
+
+    total_durations = []
+    for item in resolved_incidents + resolved_services:
+        if item.created_at and item.updated_at:
+            delta = (item.updated_at - item.created_at).total_seconds() / 3600  # hours
+            total_durations.append(delta)
+
+    if total_durations:
+        avg_hours = sum(total_durations) / len(total_durations)
+        if avg_hours < 1:
+            avg_time = f"{int(avg_hours * 60)} min"
+        else:
+            avg_time = f"{round(avg_hours, 1)} hr"
+    else:
+        avg_time = "—"
+
     stats = {
         "total_tickets": total_incidents + total_services,
         "open_tickets": open_tickets,
         "resolved_tickets": resolved_tickets,
-        "avg_resolution_time": "2h 30m (static placeholder)"
+        "avg_resolution_time": avg_time
     }
 
     return render_template('admin/dashboard.html', stats=stats)
@@ -48,12 +58,3 @@ def dashboard_data():
         "service_labels": service_statuses,
         "service_values": service_counts
     })
-
-
-"""
-Developer Notes:
-----------------
-- The /admin/dashboard route renders the HTML page with summary cards.
-- The /admin/dashboard/data route supplies JSON to Chart.js for live charts.
-- Later you can compute real avg resolution time or add SLAs easily.
-"""
