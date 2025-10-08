@@ -1,0 +1,42 @@
+/*
+style.css - Global Stylesheet for Servisio
+
+Purpose:
+    Provides a clean, unified design for all pages.
+    Works with Bootstrap and can be customized by the frontend team.
+
+Usage:
+    Linked in base.html.
+*/
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+h2 {
+    margin-top: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.table th {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-primary,
+.btn-success {
+    border-radius: 6px;
+}
+
+footer {
+    background-color: #f1f1f1;
+    font-size: 14px;
+    color: #555;
+}

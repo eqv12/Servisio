@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Service Requests - Servisio{% endblock %}
+{% block content %}
+<h2>Service Request Management</h2>
+<table class="table table-striped">
+    <thead><tr><th>ID</th><th>Title</th><th>Status</th></tr></thead>
+    <tbody>
+        {% for s in services %}
+        <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.title }}</td>
+            <td>{{ s.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard - Servisio{% endblock %}
+{% block content %}
+<h2>User Dashboard</h2>
+<ul>
+    <li>Open Tickets: {{ stats.open }}</li>
+    <li>In Progress: {{ stats.in_progress }}</li>
+    <li>Resolved: {{ stats.resolved }}</li>
+</ul>
+<a href="{{ url_for('portal.my_tickets') }}" class="btn btn-primary">View My Tickets</a>
+<a href="{{ url_for('portal.new_ticket') }}" class="btn btn-success">Create New Ticket</a>
+{% endblock %}

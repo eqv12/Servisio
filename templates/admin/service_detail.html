@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Service Request #{{ service.id }} - Servisio{% endblock %}
+{% block content %}
+<h2>Service Request Details</h2>
+<p><strong>Title:</strong> {{ service.title }}</p>
+<p><strong>Status:</strong> {{ service.status }}</p>
+{% endblock %}

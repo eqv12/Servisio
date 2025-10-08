@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}New Ticket - Servisio{% endblock %}
+{% block content %}
+<h2>Create New Ticket</h2>
+<form method="POST">
+    <div class="form-group">
+        <label>Title</label>
+        <input type="text" class="form-control" name="title" placeholder="Enter issue title">
+    </div>
+    <div class="form-group mt-3">
+        <label>Description</label>
+        <textarea class="form-control" name="description" rows="4"></textarea>
+    </div>
+    <div class="form-group mt-3">
+        <label>Priority</label>
+        <select class="form-control" name="priority">
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+</form>
+{% endblock %}

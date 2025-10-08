@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Incident #{{ incident.id }} - Servisio{% endblock %}
+{% block content %}
+<h2>Incident Details</h2>
+<p><strong>Title:</strong> {{ incident.title }}</p>
+<p><strong>Status:</strong> {{ incident.status }}</p>
+<p><strong>Priority:</strong> {{ incident.priority }}</p>
+{% endblock %}
