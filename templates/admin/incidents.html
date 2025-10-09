@@ -1,18 +1,48 @@
 {% extends "base.html" %}
-{% block title %}Incident Management - Servisio{% endblock %}
 {% block content %}
 <h2>Incident Management</h2>
-<table class="table table-striped">
-    <thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Priority</th></tr></thead>
-    <tbody>
-        {% for i in incidents %}
-        <tr>
-            <td>{{ i.id }}</td>
-            <td>{{ i.title }}</td>
-            <td>{{ i.status }}</td>
-            <td>{{ i.priority }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
+
+{% if incidents %}
+<table class="table table-striped align-middle">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Status</th>
+      <th>Priority</th>
+      <th>Created By</th>
+      <th>Created At</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in incidents %}
+    <tr>
+      <td>{{ i.id }}</td>
+      <td>{{ i.title }}</td>
+      <td>
+        <form action="{{ url_for('incidents.update_incident', id=i.id) }}" method="POST" class="d-inline">
+          <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="Open" {{ 'selected' if i.status == 'Open' else '' }}>Open</option>
+            <option value="In Progress" {{ 'selected' if i.status == 'In Progress' else '' }}>In Progress</option>
+            <option value="Resolved" {{ 'selected' if i.status == 'Resolved' else '' }}>Resolved</option>
+          </select>
+        </form>
+      </td>
+      <td>{{ i.priority }}</td>
+      <td>{{ i.creator.username if i.creator else '—' }}</td>
+      <td>{{ i.created_at.strftime('%Y-%m-%d %H:%M') if i.created_at else '—' }}</td>
+      <td>
+        <form action="{{ url_for('incidents.delete_incident', id=i.id) }}" method="POST" class="d-inline" 
+              onsubmit="return confirm('Are you sure you want to delete this incident?');">
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
+{% else %}
+  <div class="alert alert-info">No incidents found.</div>
+{% endif %}
 {% endblock %}
