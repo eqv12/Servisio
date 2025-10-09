@@ -19,14 +19,18 @@ from datetime import datetime
 db = SQLAlchemy()  # Initialize in app.py after importing
 
 class User(db.Model):
-    """User table with roles."""
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='user')  # user/admin/technician
 
     tickets = db.relationship('Incident', backref='creator', lazy=True)
 
+    def has_role(self, *roles):
+        return self.role in roles
+
+    tickets = db.relationship('Incident', backref='creator', lazy=True)
+    
 class Incident(db.Model):
     """Incident tickets table."""
     id = db.Column(db.Integer, primary_key=True)
