@@ -19,12 +19,6 @@ from datetime import datetime
 db = SQLAlchemy()  # Initialize in app.py after importing
 
 class User(db.Model):
-<<<<<<< HEAD
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='user')  # user/admin/technician
-=======
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -35,7 +29,6 @@ class User(db.Model):
     # Relationships
     incidents = db.relationship('Incident', back_populates='creator', lazy=True)
     service_requests = db.relationship('ServiceRequest', back_populates='requester', lazy=True)
->>>>>>> origin/merged
 
 
     def has_role(self, *roles):
