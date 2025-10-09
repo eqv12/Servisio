@@ -87,17 +87,15 @@ db.session.add_all(services)
 db.session.commit()
 
 # --- Knowledge Base Articles ---
+
 articles = [
-    KBArticle(
-        title="How to reset your password",
-        content="1. Go to account settings...\n2. Click 'Reset Password'..."
-    ),
-    KBArticle(
-        title="How to connect to VPN",
-        content="1. Open VPN client...\n2. Enter credentials...\n3. Click Connect."
-    )
+    KBArticle(title="Resetting VPN Connection", content="Steps to reconnect VPN...", category="Network"),
+    KBArticle(title="Fixing Printer Jam", content="How to resolve printer issues...", category="Hardware"),
+    KBArticle(title="Installing Software", content="Procedure for new installations...", category="Software"),
+    KBArticle(title="Password Reset Guide", content="Steps to reset your password...", category="Accounts"),
 ]
 db.session.add_all(articles)
 db.session.commit()
+
 
 print("✅ Database seeded successfully with dummy data!")

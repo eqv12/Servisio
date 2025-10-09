@@ -60,11 +60,14 @@ class ServiceRequest(db.Model):
 
 
 class KBArticle(db.Model):
-    """Knowledge Base articles."""
+    __tablename__ = 'kb_article'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(150), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    category = db.Column(db.String(100), nullable=False)  # e.g. "Network", "Hardware", "Software"
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+
 
 class TicketHistory(db.Model):
     """History of ticket updates."""
