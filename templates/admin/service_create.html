@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Create New Service Request - Servisio{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Create New Service Request</h2>
+
+  <form method="POST" action="{{ url_for('services.create_service') }}">
+    <div class="mb-3">
+      <label class="form-label">Title</label>
+      <input type="text" name="title" class="form-control" placeholder="Enter request title" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      <textarea name="description" class="form-control" rows="4" placeholder="Describe the request" required></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Request Type</label>
+      <select name="request_type" class="form-select">
+        <option value="Software">Software</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Access">Access</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Service Request</button>
+    <a href="{{ url_for('services.list_services') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+
+{% endblock %}
