@@ -2,9 +2,21 @@
 {% block title %}Knowledge Base - Servisio{% endblock %}
 {% block content %}
 <h2>Knowledge Base</h2>
+<form method="POST" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" name="keyword" placeholder="Search articles..." value="{{ keyword or '' }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
 <ul>
     {% for article in articles %}
-    <li>{{ article.title }}</li>
+    <li>
+        <strong>{{ article.title }}</strong>
+        <div class="text-muted small">{{ article.created_at.strftime('%Y-%m-%d') }}</div>
+        <div>{{ article.content[:120] }}{% if article.content|length > 120 %}...{% endif %}</div>
+    </li>
+    {% else %}
+    <li>No articles found.</li>
     {% endfor %}
 </ul>
 {% endblock %}
