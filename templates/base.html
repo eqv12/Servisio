@@ -67,5 +67,123 @@ Usage:
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
+
+    <!-- Floating Chatbot Widget -->
+    <div class="servisio-chatbot" id="servisio-chatbot">
+      <div class="servisio-chat-panel" id="servisio-chat-panel">
+        <div class="servisio-chat-header">
+          <strong>ServisioBot</strong>
+          <button class="btn btn-sm btn-light" id="servisio-chat-close" title="Close">×</button>
+        </div>
+        <div class="servisio-chat-body" id="servisio-chat-body">
+          <div class="servisio-msg bot"><div class="servisio-bubble">Hi! I’m ServisioBot. How can I help you today?</div></div>
+        </div>
+        <div class="servisio-chat-input">
+          <input type="text" id="servisio-chat-input" placeholder="Type your message..." />
+          <button id="servisio-chat-send">Send</button>
+        </div>
+      </div>
+      <button class="servisio-chat-toggle" id="servisio-chat-toggle" aria-label="Open chat">
+        💬
+      </button>
+    </div>
+
+    <script>
+      (function(){
+        const toggle = document.getElementById('servisio-chat-toggle');
+        const panel = document.getElementById('servisio-chat-panel');
+        const body = document.getElementById('servisio-chat-body');
+        const input = document.getElementById('servisio-chat-input');
+        const send = document.getElementById('servisio-chat-send');
+        const closeBtn = document.getElementById('servisio-chat-close');
+
+        function setOpen(isOpen){ panel.classList.toggle('open', isOpen); toggle.classList.toggle('hidden', isOpen); }
+        function addMessage(text, who){
+          const wrap = document.createElement('div');
+          wrap.className = 'servisio-msg ' + (who || 'bot');
+          const bubble = document.createElement('div');
+          bubble.className = 'servisio-bubble';
+          if ((who || 'bot') === 'bot') {
+            bubble.innerHTML = markdownToHtml(text);
+          } else {
+            bubble.textContent = text;
+          }
+          wrap.appendChild(bubble);
+          body.appendChild(wrap);
+          requestAnimationFrame(() => { wrap.classList.add('enter'); body.scrollTop = body.scrollHeight; });
+        }
+        function escapeHtml(s){
+          return s
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;');
+        }
+        function markdownToHtml(text){
+          // Escape first to prevent injection
+          const escaped = escapeHtml(text || '');
+          const lines = escaped.split(/\r?\n/);
+          let html = '';
+          let inList = false;
+          for (const line of lines){
+            if (/^\s*[-*]\s+/.test(line)){
+              if(!inList){ html += '<ul class="servisio-list">'; inList = true; }
+              const item = line.replace(/^\s*[-*]\s+/, '');
+              html += '<li>' + item + '</li>';
+              continue;
+            }
+            if (line.trim() === ''){
+              if(inList){ html += '</ul>'; inList = false; }
+              html += '<p></p>';
+              continue;
+            }
+            if(inList){ html += '</ul>'; inList = false; }
+            html += '<p>' + line + '</p>';
+          }
+          if(inList){ html += '</ul>'; }
+          // Bold and italics (after escaping) — simple, non-greedy
+          html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1<\/strong>')
+                     .replace(/(^|[^*])\*(?!\s)(.+?)\*(?!\s)/g, '$1<em>$2<\/em>');
+          return html;
+        }
+        function showTyping(){
+          const wrap = document.createElement('div');
+          wrap.className = 'servisio-msg bot typing';
+          wrap.innerHTML = '<div class="servisio-bubble"><span class="typing-dots"><span></span><span></span><span></span></span></div>';
+          body.appendChild(wrap);
+          body.scrollTop = body.scrollHeight;
+          return wrap;
+        }
+        function removeTyping(node){ if(node && node.parentNode){ node.parentNode.removeChild(node); } }
+        async function sendMessage(){
+          const text = (input.value || '').trim();
+          if(!text) return;
+          addMessage(text, 'user');
+          input.value = '';
+          const typingNode = showTyping();
+          try {
+            const res = await fetch('{{ url_for("api.api_chatbot") }}', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: text })
+            });
+            const data = await res.json();
+            removeTyping(typingNode);
+            if(res.ok && data && typeof data.reply === 'string'){
+              addMessage(data.reply, 'bot');
+            } else {
+              addMessage(data.error || 'Sorry, the chatbot is unavailable.', 'bot');
+            }
+          } catch (e) {
+            removeTyping(typingNode);
+            addMessage('Network error. Please try again later.', 'bot');
+          }
+        }
+
+        toggle.addEventListener('click', () => setOpen(true));
+        closeBtn.addEventListener('click', () => setOpen(false));
+        send.addEventListener('click', sendMessage);
+        input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ sendMessage(); }});
+      })();
+    </script>
 </body>
 </html>
