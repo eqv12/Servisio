@@ -32,10 +32,10 @@ Usage:
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Tickets</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Knowledge Base</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.portal_home') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.my_tickets') }}">Tickets</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('kb.kb_home') }}">Knowledge Base</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
                 </ul>
             </div>
         </div>
