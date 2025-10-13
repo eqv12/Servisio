@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Create New Incident - Servisio{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Create New Incident</h2>
+
+  <form method="POST" action="{{ url_for('incidents.create_incident') }}">
+    <div class="mb-3">
+      <label class="form-label">Title</label>
+      <input type="text" name="title" class="form-control" placeholder="Enter incident title" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      <textarea name="description" class="form-control" rows="4" placeholder="Describe the issue" required></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Priority</label>
+      <select name="priority" class="form-select">
+        <option value="Low">Low</option>
+        <option value="Medium" selected>Medium</option>
+        <option value="High">High</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Incident</button>
+    <a href="{{ url_for('incidents.list_incidents') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+
+{% endblock %}

@@ -19,41 +19,55 @@ from datetime import datetime
 db = SQLAlchemy()  # Initialize in app.py after importing
 
 class User(db.Model):
-    """User table with roles."""
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), nullable=False)
+    role = db.Column(db.String(50), nullable=False)
 
-    tickets = db.relationship('Incident', backref='creator', lazy=True)
+    # Relationships
+    incidents = db.relationship('Incident', back_populates='creator', lazy=True)
+    service_requests = db.relationship('ServiceRequest', back_populates='requester', lazy=True)
+
 
 class Incident(db.Model):
-    """Incident tickets table."""
+    __tablename__ = 'incident'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    status = db.Column(db.String(50), default='Open')
-    priority = db.Column(db.String(20), default='Medium')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    title = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    priority = db.Column(db.String(50))
+    status = db.Column(db.String(50))
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
-    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creator = db.relationship('User', back_populates='incidents')
 
 class ServiceRequest(db.Model):
-    """Service requests table."""
+    __tablename__ = 'service_request'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    status = db.Column(db.String(50), default='Pending')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    title = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text)
+    request_type = db.Column(db.String(50))
+    status = db.Column(db.String(50))
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
-    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    requester = db.relationship('User', back_populates='service_requests')
+
+
 
 class KBArticle(db.Model):
-    """Knowledge Base articles."""
+    __tablename__ = 'kb_article'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(150), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    category = db.Column(db.String(100), nullable=False)  # e.g. "Network", "Hardware", "Software"
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+
 
 class TicketHistory(db.Model):
     """History of ticket updates."""
