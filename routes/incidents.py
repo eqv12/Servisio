@@ -14,7 +14,8 @@ Responsibilities:
 """
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models import db, Incident
+from models import db, Incident, WorkNote, User
+from datetime import datetime
 
 incidents_bp = Blueprint('incidents', __name__, url_prefix='/admin/incidents')
 
@@ -110,3 +111,33 @@ Developer Notes:
 - Add guards in template for optional fields (e.g., created_by might be None)
 - This file now returns real DB data (no dummy lists)
 """
+
+@incidents_bp.route('/<int:id>')
+def view_incident(id):
+    """Detailed view of an incident with work notes."""
+    incident = Incident.query.get_or_404(id)
+    work_notes = WorkNote.query.filter_by(incident_id=id).order_by(WorkNote.created_at.desc()).all()
+    technicians = User.query.filter_by(role='Technician').all()
+    return render_template('admin/incident_detail.html', incident=incident, work_notes=work_notes, technicians=technicians)
+
+
+@incidents_bp.route('/<int:id>/add_note', methods=['POST'])
+def add_work_note(id):
+    """Add a new technician work note to an incident."""
+    note_text = request.form.get('note')
+    technician_id = request.form.get('technician_id') or 2  # placeholder; integrate with login later
+
+    if not note_text:
+        flash("Work note cannot be empty.", "danger")
+        return redirect(url_for('incidents.view_incident', id=id))
+
+    new_note = WorkNote(
+        incident_id=id,
+        technician_id=technician_id,
+        note=note_text,
+        created_at=datetime.now()
+    )
+    db.session.add(new_note)
+    db.session.commit()
+    flash("Work note added successfully!", "success")
+    return redirect(url_for('incidents.view_incident', id=id))

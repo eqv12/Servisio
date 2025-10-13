@@ -1,8 +1,73 @@
 {% extends "base.html" %}
-{% block title %}Incident #{{ incident.id }} - Servisio{% endblock %}
+{% block title %}Incident Details{% endblock %}
 {% block content %}
-<h2>Incident Details</h2>
-<p><strong>Title:</strong> {{ incident.title }}</p>
+
+<h2>Incident #{{ incident.id }} — {{ incident.title }}</h2>
 <p><strong>Status:</strong> {{ incident.status }}</p>
 <p><strong>Priority:</strong> {{ incident.priority }}</p>
+<p><strong>Description:</strong> {{ incident.description }}</p>
+<p><strong>Created By:</strong> {{ incident.creator.username if incident.creator else '—' }}</p>
+<p><strong>Created At:</strong> {{ incident.created_at.strftime('%Y-%m-%d %H:%M') if incident.created_at else '—' }}</p>
+
+<!-- 🔧 Action Buttons -->
+<div class="d-flex align-items-center mb-4">
+  <!-- Change Status Form -->
+  <form action="{{ url_for('incidents.update_incident', id=incident.id) }}" method="POST" class="me-3">
+    <div class="input-group input-group-sm">
+      <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="Open" {{ 'selected' if incident.status == 'Open' else '' }}>Open</option>
+        <option value="In Progress" {{ 'selected' if incident.status == 'In Progress' else '' }}>In Progress</option>
+        <option value="Resolved" {{ 'selected' if incident.status == 'Resolved' else '' }}>Resolved</option>
+      </select>
+      <button class="btn btn-outline-primary" type="submit">Update</button>
+    </div>
+  </form>
+
+  <!-- Delete Incident Form -->
+  <form action="{{ url_for('incidents.delete_incident', id=incident.id) }}" method="POST" 
+        onsubmit="return confirm('Are you sure you want to delete this incident?');">
+    <button type="submit" class="btn btn-sm btn-danger">Delete Incident</button>
+  </form>
+</div>
+
+<hr>
+
+<!-- 💬 Collapsible Work Notes Section -->
+<h4>
+  <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#workNotes" aria-expanded="false">
+    💬 Work Notes ({{ work_notes|length }})
+  </button>
+</h4>
+<a href="{{ url_for('incidents.list_incidents') }}" class="btn btn-secondary btn-sm mb-3">← Back to Incidents</a>
+<div class="collapse show" id="workNotes">
+  {% if work_notes %}
+    <ul class="list-group mb-3">
+      {% for note in work_notes %}
+        <li class="list-group-item">
+          <p class="mb-1">{{ note.note }}</p>
+          <small class="text-muted">
+            Added by {{ note.technician.username if note.technician else '—' }}
+            on {{ note.created_at.strftime('%Y-%m-%d %H:%M') }}
+          </small>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info">No work notes yet.</div>
+  {% endif %}
+</div>
+
+<!-- 📝 Add Work Note Form -->
+<div class="card mt-4">
+  <div class="card-body">
+    <h5 class="card-title">Add Work Note</h5>
+    <form method="POST" action="{{ url_for('incidents.add_work_note', id=incident.id) }}">
+      <div class="mb-3">
+        <textarea name="note" class="form-control" placeholder="Enter your work note..." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-success">Add Note</button>
+    </form>
+  </div>
+</div>
+
 {% endblock %}

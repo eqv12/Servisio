@@ -77,3 +77,15 @@ class TicketHistory(db.Model):
     status = db.Column(db.String(50))
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+class WorkNote(db.Model):
+    __tablename__ = 'work_note'
+    id = db.Column(db.Integer, primary_key=True)
+    incident_id = db.Column(db.Integer, db.ForeignKey('incident.id'))
+    technician_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    note = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    # Relationships
+    incident = db.relationship('Incident', backref='work_notes')
+    technician = db.relationship('User')
