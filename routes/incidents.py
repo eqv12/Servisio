@@ -16,6 +16,7 @@ Responsibilities:
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models import db, Incident, WorkNote, User
 from datetime import datetime
+from sqlalchemy import func
 
 incidents_bp = Blueprint('incidents', __name__, url_prefix='/admin/incidents')
 
@@ -35,32 +36,38 @@ def list_incidents():
 
 @incidents_bp.route('/create', methods=['GET', 'POST'])
 def create_incident():
-    """Create a new incident"""
     if request.method == 'POST':
-        title = request.form.get('title')
-        description = request.form.get('description')
-        priority = request.form.get('priority')
+        title = request.form['title']
+        description = request.form['description']
+        category = request.form['category']
+        priority = request.form['priority']
 
-        if not title or not description:
-            flash("Title and description are required.", "danger")
-            return redirect(url_for('incidents.create_incident'))
+        # Find technician with matching team and lowest workload
+        technician = User.query.filter_by(role='Technician', team=category).order_by(User.workload.asc()).first()
+
+        assigned_to = technician.id if technician else None
 
         new_incident = Incident(
             title=title,
             description=description,
+            category=category,
             priority=priority,
             status='Open',
-            created_by=1  # temporary: assume Admin ID=1
+            created_by=1,  # placeholder until login integration
+            assigned_to=assigned_to
         )
-
         db.session.add(new_incident)
+
+        # Update technician workload count
+        if technician:
+            technician.workload += 1
+
         db.session.commit()
-        flash("Incident created successfully!", "success")
+
+        flash(f"Incident created successfully! Assigned to {technician.username if technician else 'No available technician.'}", "success")
         return redirect(url_for('incidents.list_incidents'))
 
     return render_template('admin/incident_create.html')
-
-
 
 
 """
@@ -141,3 +148,33 @@ def add_work_note(id):
     db.session.commit()
     flash("Work note added successfully!", "success")
     return redirect(url_for('incidents.view_incident', id=id))
+
+@incidents_bp.route('/assign/<int:id>', methods=['POST'])
+def assign_technician(id):
+    """Assign or reassign an incident to a technician."""
+    incident = Incident.query.get_or_404(id)
+    technician_id = request.form.get('technician_id')
+
+    if not technician_id:
+        flash("Please select a technician.", "warning")
+        return redirect(url_for('incidents.view_incident', id=id))
+
+    new_tech = User.query.get(technician_id)
+    if not new_tech:
+        flash("Invalid technician selected.", "danger")
+        return redirect(url_for('incidents.view_incident', id=id))
+
+    # Adjust workload counters
+    if incident.assigned_to and incident.assigned_to != new_tech.id:
+        old_tech = User.query.get(incident.assigned_to)
+        if old_tech and old_tech.workload > 0:
+            old_tech.workload -= 1
+    new_tech.workload += 1
+
+    # Assign and save
+    incident.assigned_to = new_tech.id
+    db.session.commit()
+
+    flash(f"Incident reassigned to {new_tech.username}.", "success")
+    return redirect(url_for('incidents.view_incident', id=id))
+

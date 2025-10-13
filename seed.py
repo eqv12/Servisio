@@ -22,13 +22,18 @@ db.drop_all()
 db.create_all()
 
 # --- Users ---
+# --- Users ---
 users = [
-    User(username="admin", email="admin@servisio.com", password="admin123", role="Admin"),
-    User(username="tech1", email="tech1@servisio.com", password="tech123", role="Technician"),
-    User(username="tech2", email="tech2@servisio.com", password="tech123", role="Technician"),
-    User(username="user1", email="user1@servisio.com", password="user123", role="User"),
-    User(username="user2", email="user2@servisio.com", password="user123", role="User"),
+    User(username="admin", password="admin123", role="Manager"),
+    User(username="tech_network", password="tech123", role="Technician", team="Network"),
+    User(username="tech_hardware", password="tech123", role="Technician", team="Hardware"),
+    User(username="tech_software", password="tech123", role="Technician", team="Software"),
+    User(username="user1", password="user123", role="User"),
+    User(username="user2", password="user123", role="User"),
 ]
+db.session.add_all(users)
+db.session.commit()
+
 db.session.add_all(users)
 db.session.commit()
 

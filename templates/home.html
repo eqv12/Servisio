@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Servisio Home{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+  <h1 class="text-center mb-5">Welcome to Servisio</h1>
+
+  <div class="row g-4 justify-content-center">
+
+    <!-- Incidents -->
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100 text-center border-0">
+        <div class="card-body">
+          <h4 class="card-title mb-3">🧾 Incidents</h4>
+          <p class="card-text text-muted">Manage, view, or report IT issues that need attention.</p>
+          <a href="/admin/incidents" class="btn btn-outline-primary w-100">Go to Incidents</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Requests -->
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100 text-center border-0">
+        <div class="card-body">
+          <h4 class="card-title mb-3">🧰 Service Requests</h4>
+          <p class="card-text text-muted">Submit or approve service-related requests and track progress.</p>
+          <a href="/admin/services" class="btn btn-outline-primary w-100">Go to Service Requests</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Knowledge Base -->
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100 text-center border-0">
+        <div class="card-body">
+          <h4 class="card-title mb-3">📚 Knowledge Base</h4>
+          <p class="card-text text-muted">Search and browse solutions for common IT problems.</p>
+          <a href="/kb" class="btn btn-outline-primary w-100">Browse KB</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard / Analytics -->
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100 text-center border-0">
+        <div class="card-body">
+          <h4 class="card-title mb-3">📊 Analytics Dashboard</h4>
+          <p class="card-text text-muted">Visual insights into incidents, services, and workloads.</p>
+          <a href="/admin/dashboard" class="btn btn-outline-primary w-100">View Dashboard</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Incident -->
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100 text-center border-0">
+        <div class="card-body">
+          <h4 class="card-title mb-3">➕ Create Incident</h4>
+          <p class="card-text text-muted">Report a new issue or outage directly from here.</p>
+          <a href="/admin/incidents/create" class="btn btn-success w-100">New Incident</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Service Request -->
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100 text-center border-0">
+        <div class="card-body">
+          <h4 class="card-title mb-3">📝 Create Service Request</h4>
+          <p class="card-text text-muted">Request hardware, software, or any IT-related service.</p>
+          <a href="/admin/services/create" class="btn btn-success w-100">New Request</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

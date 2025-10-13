@@ -21,28 +21,37 @@ db = SQLAlchemy()  # Initialize in app.py after importing
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(50), nullable=False)
+    username = db.Column(db.String(100), nullable=False, unique=True)
+    password = db.Column(db.String(100), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='User')  # Admin / Manager / Technician / User
+    team = db.Column(db.String(50), nullable=True)  # e.g., Network, Hardware, Software
+    workload = db.Column(db.Integer, default=0)  # number of assigned open tickets
 
     # Relationships
-    incidents = db.relationship('Incident', back_populates='creator', lazy=True)
+    incidents_created = db.relationship('Incident', foreign_keys='Incident.created_by', backref='creator', lazy=True)
+    incidents_assigned = db.relationship('Incident', foreign_keys='Incident.assigned_to', backref='technician', lazy=True)
     service_requests = db.relationship('ServiceRequest', back_populates='requester', lazy=True)
+
+    def __repr__(self):
+        return f"<User {self.username} ({self.role})>"
 
 
 class Incident(db.Model):
     __tablename__ = 'incident'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(120), nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text)
+    category = db.Column(db.String(50))  # Network, Hardware, Software, etc.
     priority = db.Column(db.String(50))
-    status = db.Column(db.String(50))
+    status = db.Column(db.String(50), default='Open')
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    kb_article_id = db.Column(db.Integer, db.ForeignKey('kb_article.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=db.func.now())
-    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-    creator = db.relationship('User', back_populates='incidents')
+    kb_article = db.relationship('KBArticle')
+
 
 class ServiceRequest(db.Model):
     __tablename__ = 'service_request'

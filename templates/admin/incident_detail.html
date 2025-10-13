@@ -8,6 +8,24 @@
 <p><strong>Description:</strong> {{ incident.description }}</p>
 <p><strong>Created By:</strong> {{ incident.creator.username if incident.creator else '—' }}</p>
 <p><strong>Created At:</strong> {{ incident.created_at.strftime('%Y-%m-%d %H:%M') if incident.created_at else '—' }}</p>
+   <p><strong>Assigned Technician:</strong> {{ incident.technician.username if incident.technician else 'Unassigned' }}
+
+  <!-- Manual reassignment form -->
+  <form action="{{ url_for('incidents.assign_technician', id=incident.id) }}" method="POST" class="mt-2">
+    <div class="input-group" style="max-width: 350px;">
+      <select name="technician_id" class="form-select form-select-sm">
+        {% for tech in technicians %}
+          <option value="{{ tech.id }}" {{ 'selected' if incident.technician and tech.id == incident.technician.id else '' }}>
+            {{ tech.username }} ({{ tech.team or '—' }})
+          </option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-sm btn-outline-primary" type="submit">Reassign</button>
+    </div>
+  </form>
+</p>
+
+
 
 <!-- 🔧 Action Buttons -->
 <div class="d-flex align-items-center mb-4">
@@ -49,6 +67,8 @@
             Added by {{ note.technician.username if note.technician else '—' }}
             on {{ note.created_at.strftime('%Y-%m-%d %H:%M') }}
           </small>
+       
+
         </li>
       {% endfor %}
     </ul>

@@ -32,6 +32,7 @@ from routes.api import api_bp
 from routes.portal import portal_bp
 from models import db
 from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+from routes.home import home_bp
 
 
 
@@ -54,6 +55,8 @@ def create_app():
     app.register_blueprint(dashboard_bp, url_prefix='/admin/dashboard')
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(portal_bp, url_prefix='/portal')
+    app.register_blueprint(home_bp)
+
 
     # Base route
     @app.route('/')
