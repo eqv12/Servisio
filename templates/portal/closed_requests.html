@@ -1,13 +1,7 @@
 {% extends "base.html" %}
-{% block title %}My Tickets - Servisio{% endblock %}
+{% block title %}Closed Requests - Servisio{% endblock %}
 {% block content %}
-<h2>My Tickets</h2>
-<form method="get" class="mb-3">
-    <div class="input-group">
-        <input type="text" class="form-control" name="q" placeholder="Search tickets..." value="{{ q|default('') }}">
-        <button type="submit" class="btn btn-primary">Search</button>
-    </div>
-</form>
+<h2>Closed Requests</h2>
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -22,7 +16,7 @@
             <td>{{ ticket.status }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="3">No tickets found.</td></tr>
+        <tr><td colspan="3">No closed requests found.</td></tr>
         {% endfor %}
     </tbody>
 </table>

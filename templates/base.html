@@ -32,6 +32,7 @@ Usage:
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+<<<<<<< HEAD
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
                     <!-- Tickets Dropdown -->
@@ -46,6 +47,12 @@ Usage:
 </li>
                     <li class="nav-item"><a class="nav-link" href="/kb">Knowledge Base</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+=======
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.portal_home') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.my_tickets') }}">Tickets</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('kb.kb_home') }}">Knowledge Base</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
+>>>>>>> origin/user-portal
                 </ul>
             </div>
         </div>
