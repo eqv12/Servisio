@@ -4,4 +4,8 @@
 <h2>Service Request Details</h2>
 <p><strong>Title:</strong> {{ service.title }}</p>
 <p><strong>Status:</strong> {{ service.status }}</p>
+<p><strong>Status:</strong> {{ service.status }}</p>
+<p><strong>Approved By:</strong> {{ service.approver.username if service.approver else '—' }}</p>
+<p><strong>Approved At:</strong> {{ service.approved_at.strftime('%Y-%m-%d %H:%M') if service.approved_at else '—' }}</p>
+
 {% endblock %}

@@ -30,7 +30,12 @@ class User(db.Model):
     # Relationships
     incidents_created = db.relationship('Incident', foreign_keys='Incident.created_by', backref='creator', lazy=True)
     incidents_assigned = db.relationship('Incident', foreign_keys='Incident.assigned_to', backref='technician', lazy=True)
-    service_requests = db.relationship('ServiceRequest', back_populates='requester', lazy=True)
+    service_requests = db.relationship(
+    'ServiceRequest',
+    back_populates='requester',
+    foreign_keys='ServiceRequest.created_by',
+    lazy=True
+)
 
     def __repr__(self):
         return f"<User {self.username} ({self.role})>"
@@ -47,10 +52,20 @@ class Incident(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     kb_article_id = db.Column(db.Integer, db.ForeignKey('kb_article.id'), nullable=True)
+
+    # 👇 New fields
+    approved_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    approved_at = db.Column(db.DateTime, nullable=True)
+    approval_status = db.Column(db.String(50), default='Pending')  # Pending / Approved / Rejected
+
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     kb_article = db.relationship('KBArticle')
+
+    # Relationships
+    approver = db.relationship('User', foreign_keys=[approved_by])
+
 
 
 class ServiceRequest(db.Model):
@@ -59,12 +74,17 @@ class ServiceRequest(db.Model):
     title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
     request_type = db.Column(db.String(50))
-    status = db.Column(db.String(50))
+    status = db.Column(db.String(50), default='Pending Approval')  # default status
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    approved_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    approved_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
-    requester = db.relationship('User', back_populates='service_requests')
+    requester = db.relationship('User', foreign_keys=[created_by], back_populates='service_requests')
+    approver = db.relationship('User', foreign_keys=[approved_by])
+
+
 
 
 

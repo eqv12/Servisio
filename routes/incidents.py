@@ -13,10 +13,11 @@ Responsibilities:
     - Prepare for later CRUD additions (create, update, delete)
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from models import db, Incident, WorkNote, User
 from datetime import datetime
 from sqlalchemy import func
+from flask_login import current_user
 
 incidents_bp = Blueprint('incidents', __name__, url_prefix='/admin/incidents')
 
@@ -176,5 +177,45 @@ def assign_technician(id):
     db.session.commit()
 
     flash(f"Incident reassigned to {new_tech.username}.", "success")
+    return redirect(url_for('incidents.view_incident', id=id))
+
+
+@incidents_bp.route('/approve/<int:id>', methods=['POST'])
+def approve_incident(id):
+    """Approve an incident (Admin/Manager only)."""
+    if current_user.role not in ['Admin', 'Manager']:
+        abort(403)
+
+    incident = Incident.query.get_or_404(id)
+    incident.approval_status = 'Approved'
+    incident.approved_by = current_user.id
+    incident.approved_at = datetime.now()
+    # Auto-assign technician from the same category/team
+    technician = User.query.filter_by(role='Technician', team=incident.category)\
+                        .order_by(User.workload.asc()).first()
+    if technician:
+        incident.assigned_to = technician.id
+        technician.workload += 1
+    db.session.commit()
+
+    db.session.commit()
+
+    flash(f"Incident '{incident.title}' approved successfully!", "success")
+    return redirect(url_for('incidents.view_incident', id=id))
+
+
+@incidents_bp.route('/reject/<int:id>', methods=['POST'])
+def reject_incident(id):
+    """Reject an incident (Admin/Manager only)."""
+    if current_user.role not in ['Admin', 'Manager']:
+        abort(403)
+
+    incident = Incident.query.get_or_404(id)
+    incident.approval_status = 'Rejected'
+    incident.approved_by = current_user.id
+    incident.approved_at = datetime.now()
+    db.session.commit()
+
+    flash(f"Incident '{incident.title}' has been rejected.", "danger")
     return redirect(url_for('incidents.view_incident', id=id))
 

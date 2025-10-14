@@ -14,6 +14,10 @@ Responsibilities:
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models import db, ServiceRequest
+from datetime import datetime
+from flask_login import current_user
+from flask import abort
+
 
 services_bp = Blueprint('services', __name__, url_prefix='/admin/services')
 
@@ -95,4 +99,39 @@ def delete_service(id):
     else:
         flash("Service request not found.", "danger")
 
+    return redirect(url_for('services.list_services'))
+
+@services_bp.route('/approve/<int:id>', methods=['POST'])
+def approve_service(id):
+    """Approve a service request (Admin/Manager only)."""
+    if current_user.role not in ['Admin', 'Manager']:
+        abort(403)
+
+    service = ServiceRequest.query.get_or_404(id)
+    service.status = 'Approved'
+    service.approved_by = current_user.id
+    service.approved_at = datetime.now()
+
+    # Auto-assign technician after approval
+    technician = User.query.filter_by(role='Technician', team=service.request_type).order_by(User.workload.asc()).first()
+    if technician:
+        service.assigned_to = technician.id
+        technician.workload += 1
+    db.session.commit()
+    flash(f"Service request '{service.title}' approved successfully!", "success")
+    return redirect(url_for('services.list_services'))
+
+
+@services_bp.route('/reject/<int:id>', methods=['POST'])
+def reject_service(id):
+    """Reject a service request (Admin/Manager only)."""
+    if current_user.role not in ['Admin', 'Manager']:
+        abort(403)
+
+    service = ServiceRequest.query.get_or_404(id)
+    service.status = 'Rejected'
+    service.approved_by = current_user.id
+    service.approved_at = datetime.now()
+    db.session.commit()
+    flash(f"Service request '{service.title}' has been rejected.", "danger")
     return redirect(url_for('services.list_services'))
