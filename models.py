@@ -31,11 +31,6 @@ class User(db.Model):
     service_requests = db.relationship('ServiceRequest', back_populates='requester', lazy=True)
 
 
-    def has_role(self, *roles):
-        return self.role in roles
-
-    tickets = db.relationship('Incident', backref='creator', lazy=True)
-    
 class Incident(db.Model):
     __tablename__ = 'incident'
     id = db.Column(db.Integer, primary_key=True)
