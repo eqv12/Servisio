@@ -1,4 +1,4 @@
-# routes/auth.py
+# # routes/auth.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from services.auth_service import (
@@ -7,7 +7,6 @@ from services.auth_service import (
     logout_current_user,
     create_user,
     get_user_by_username,
-    roles_required
 )
 
 auth_bp = Blueprint("auth", __name__, template_folder="templates", url_prefix="/auth")
@@ -17,7 +16,7 @@ auth_bp = Blueprint("auth", __name__, template_folder="templates", url_prefix="/
 def login():
     if current_user.is_authenticated:
         flash("Already logged in.", "info")
-        return redirect(url_for("index"))  # Redirect to index instead of login
+        return redirect(url_for("index"))
 
     if request.method == "POST":
         username = request.form.get("username", "").strip()
@@ -32,8 +31,12 @@ def login():
         if user:
             login_user_and_remember(user, remember=remember)
             flash("Login successful.", "success")
-            next_page = request.args.get("next")
-            return redirect(next_page or url_for("index"))  # Redirect to index
+            if user.role == "Admin":
+                return redirect(url_for("admin.dashboard"))
+            elif user.role == "Technician":
+                return redirect(url_for("dashboard.dashboard_home"))
+            else:
+                return redirect(url_for("index"))
         else:
             flash(error, "danger")
 
@@ -49,13 +52,10 @@ def logout():
     return redirect(url_for("auth.login"))
 
 
-# ---------------- Register (Admin Only) ----------------
+# ---------------- Register ----------------
 @auth_bp.route("/register", methods=["GET", "POST"])
-# @login_required
-# @roles_required("Admin")
 def register():
     if request.method == "POST":
-        print("register entered")
         username = request.form.get("username")
         password = request.form.get("password")
         email = request.form.get("email")
@@ -67,18 +67,6 @@ def register():
 
         create_user(username=username, password=password, email=email, role=role)
         flash(f"User {username} created with role {role}", "success")
-        return redirect(url_for("auth.register"))
+        return redirect(url_for("auth.login"))
 
     return render_template("auth/register.html")
-
-
-# ---------------- Simple Index Route ----------------
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route("/")
-@login_required
-def index():
-    # A simple dashboard or homepage after login
-    return render_template("index.html", user=current_user)

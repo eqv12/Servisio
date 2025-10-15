@@ -15,16 +15,25 @@ Usage:
 
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_login import UserMixin
+from flask_bcrypt import Bcrypt 
 
 db = SQLAlchemy()  # Initialize in app.py after importing
+bcrypt = Bcrypt()
 
-class User(db.Model):
+class User(db.Model,UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(50), nullable=False)
+
+    def set_password(self, raw_password: str):
+        self.password = bcrypt.generate_password_hash(raw_password).decode("utf-8")
+
+    def check_password(self, raw_password: str) -> bool:
+        return bcrypt.check_password_hash(self.password, raw_password)
 
     # Relationships
     incidents = db.relationship('Incident', back_populates='creator', lazy=True)

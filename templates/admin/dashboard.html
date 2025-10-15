@@ -11,7 +11,7 @@
       <div class="card bg-primary text-white shadow-sm">
         <div class="card-body">
           <h5>Total Tickets</h5>
-          <h2>{{ stats.total_tickets }}</h2>
+          <!-- <h2>{{ stats.total_tickets }}</h2> -->
         </div>
       </div>
     </div>
@@ -19,7 +19,7 @@
       <div class="card bg-warning text-dark shadow-sm">
         <div class="card-body">
           <h5>Open / Pending</h5>
-          <h2>{{ stats.open_tickets }}</h2>
+          <!-- <h2>{{ stats.open_tickets }}</h2> -->
         </div>
       </div>
     </div>
@@ -27,7 +27,7 @@
       <div class="card bg-success text-white shadow-sm">
         <div class="card-body">
           <h5>Resolved</h5>
-          <h2>{{ stats.resolved_tickets }}</h2>
+          <!-- <h2>{{ stats.resolved_tickets }}</h2> -->
         </div>
       </div>
     </div>
@@ -35,7 +35,7 @@
       <div class="card bg-info text-white shadow-sm">
         <div class="card-body">
           <h5>Avg Resolution Time</h5>
-          <h2>{{ stats.avg_resolution_time }}</h2>
+          <!-- <h2>{{ stats.avg_resolution_time }}</h2> -->
         </div>
       </div>
     </div>
@@ -62,6 +62,80 @@
     </div>
   </div>
 </div>
+<!-- ==========================
+     USER MANAGEMENT SECTION
+========================== -->
+<div class="container mt-5">
+  <h3 class="mb-4">👥 User Management</h3>
+
+  <!-- Add User Form -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">Add New User / Technician</div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('admin.add_user') }}">
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <label class="form-label">Role</label>
+            <select name="role" class="form-select" required>
+              <option value="User">User</option>
+              <option value="Technician">Technician</option>
+            </select>
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-success w-100">Add User</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Existing Users Table -->
+  <div class="card">
+    <div class="card-header bg-secondary text-white">Existing Users</div>
+    <div class="card-body">
+      <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="text-center text-muted">No users found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
 
@@ -104,26 +178,26 @@
       }
     }
   });
+// Fetch live data and update both charts
+function updateCharts() {
+  fetch("{{ url_for('admin.dashboard_data') }}")
+    .then(res => res.json())
+    .then(data => {
+      // Incidents
+      incidentChart.data.labels = data.incident_labels;
+      incidentChart.data.datasets[0].data = data.incident_values;
+      incidentChart.update();
 
-  // Fetch live data and update both charts
-  function updateCharts() {
-    fetch("{{ url_for('dashboard.dashboard_data') }}")
-      .then(res => res.json())
-      .then(data => {
-        // Incidents
-        incidentChart.data.labels = data.incident_labels;
-        incidentChart.data.datasets[0].data = data.incident_values;
-        incidentChart.update();
+      // Services
+      serviceChart.data.labels = data.service_labels;
+      serviceChart.data.datasets[0].data = data.service_values;
+      serviceChart.update();
+    });
+}
 
-        // Services
-        serviceChart.data.labels = data.service_labels;
-        serviceChart.data.datasets[0].data = data.service_values;
-        serviceChart.update();
-      });
-  }
+// Initial load + auto-refresh every 30s
+updateCharts();
+setInterval(updateCharts, 30000);
 
-  // Initial load + auto-refresh every 30s
-  updateCharts();
-  setInterval(updateCharts, 30000);
 </script>
 {% endblock %}

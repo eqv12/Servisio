@@ -24,7 +24,7 @@ Usage:
     <!-- Header / Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Servisio</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">Servisio</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
                     data-bs-target="#navbarNav" aria-controls="navbarNav" 
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -39,12 +39,12 @@ Usage:
     Tickets
   </a>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ticketsDropdown">
-    <li><a class="dropdown-item" href="{{ url_for('incidents.list_incidents') }}">Incidents</a></li>
+    <li><a class="dropdown-item" href="#">Incidents</a></li>
     <li><a class="dropdown-item" href="{{ url_for('services.list_services') }}">Service Requests</a></li>
   </ul>
 </li>
                     <li class="nav-item"><a class="nav-link" href="/kb">Knowledge Base</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
                 </ul>
             </div>
         </div>
