@@ -1,25 +1,68 @@
-"""
-auth.py - Authentication & Role Management Blueprint
+# routes/auth.py
 
-Purpose:
-    Handles user login, logout, and role-based access.
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask_login import login_user, logout_user, current_user, login_required
 
-Responsibilities:
-    - Login and logout routes
-    - Role verification
-    - Placeholder templates for login/register forms
-"""
+# --- IMPORT FROM extensions.py ---
+from extensions import db, bcrypt
+# ---------------------------------
+from models import User # We still need the User model
+from forms import LoginForm, RegistrationForm
 
-from flask import Blueprint, render_template, request, redirect, url_for
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/login')
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Render the login template to verify Jinja rendering."""
-    return render_template('auth/login.html')
+    """Handles user login."""
+    if current_user.is_authenticated:
+        # If already logged in, send them to the right dashboard
+        if current_user.role == 'User':
+            return redirect(url_for('portal.portal_home'))
+        return redirect(url_for('home.home'))
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        
+        # Check if user exists and password is correct
+        if user and user.check_password(form.password.data):
+            login_user(user) # This is the magic!
+            flash('Login successful!', 'success')
+            
+            # --- ROLE-BASED REDIRECT ---
+            if current_user.role == 'User':
+                return redirect(url_for('portal.portal_home'))
+            else:
+                # Admin and Technician go to the admin-side home
+                return redirect(url_for('home.home'))
+            # ---------------------------
+        else:
+            flash('Login unsuccessful. Please check username and password.', 'danger')
+
+    return render_template('auth/login.html', title='Login', form=form)
 
 @auth_bp.route('/logout')
+@login_required  # Can't logout if you aren't logged in
 def logout():
-    """Logout route (placeholder)."""
-    return "Logout Page - Replace with logic"
+    """Logs the current user out."""
+    logout_user()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('auth.login'))
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    """Handles new user registration."""
+    if current_user.is_authenticated:
+        return redirect(url_for('home.home'))
+
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, role=form.role.data)
+        user.set_password(form.password.data) # Use our hashing method
+        db.session.add(user)
+        db.session.commit()
+        flash('Your account has been created! You can now log in.', 'success')
+        return redirect(url_for('auth.login'))
+
+    return render_template('auth/register.html', title='Register', form=form)

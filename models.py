@@ -13,29 +13,44 @@ Usage:
     Import models in routes for CRUD operations.
 """
 
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_login import UserMixin  # <-- IMPORT THIS
+from extensions import db, bcrypt
 
-db = SQLAlchemy()  # Initialize in app.py after importing
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
-    password = db.Column(db.String(100), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='User')  # Admin / Manager / Technician / User
-    team = db.Column(db.String(50), nullable=True)  # e.g., Network, Hardware, Software
-    workload = db.Column(db.Integer, default=0)  # number of assigned open tickets
+    
+    # --- VITAL CHANGE ---
+    # Rename 'password' to 'password_hash' for clarity and security
+    password_hash = db.Column(db.String(128), nullable=False)
+    # --------------------
+    
+    role = db.Column(db.String(20), nullable=False, default='User') 
+    team = db.Column(db.String(50), nullable=True) 
+    workload = db.Column(db.Integer, default=0) 
 
     # Relationships
     incidents_created = db.relationship('Incident', foreign_keys='Incident.created_by', backref='creator', lazy=True)
     incidents_assigned = db.relationship('Incident', foreign_keys='Incident.assigned_to', backref='technician', lazy=True)
     service_requests = db.relationship(
-    'ServiceRequest',
-    back_populates='requester',
-    foreign_keys='ServiceRequest.created_by',
-    lazy=True
-)
+        'ServiceRequest',
+        back_populates='requester',
+        foreign_keys='ServiceRequest.created_by',
+        lazy=True
+    )
+
+    # --- ADD THESE HELPER METHODS ---
+    def set_password(self, password):
+        """Hashes and sets the user's password."""
+        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    def check_password(self, password):
+        """Checks if a provided password matches the hash."""
+        return bcrypt.check_password_hash(self.password_hash, password)
+    # --------------------------------
 
     def __repr__(self):
         return f"<User {self.username} ({self.role})>"

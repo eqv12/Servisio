@@ -1,16 +1,21 @@
-from flask import Blueprint, render_template
-from flask_login import current_user, current_user
+# routes/home.py
+
+from flask import Blueprint, render_template, redirect, url_for
+from flask_login import current_user, login_required  # <-- IMPORT THESE
 
 home_bp = Blueprint('home', __name__)
 
 @home_bp.route('/')
+@login_required  # <-- PROTECT THE ROUTE
 def home():
     """
     Role-aware landing page.
-    Displays navigation cards to all major modules.
+    Redirects 'User' roles to the portal.
+    Shows admin/tech dashboard for others.
     """
-    # In the future, you can customize based on role:
-    # if current_user.is_authenticated and current_user.role == 'Technician':
-    #     return redirect(url_for('incidents.list_incidents'))
-
+    # --- ROLE-BASED REDIRECT ---
+    if current_user.role == 'User':
+        return redirect(url_for('portal.portal_home'))
+    
+    # Admins and Technicians will see home.html
     return render_template('home.html')

@@ -1,30 +1,25 @@
-<!-- {# 
-base.html - Base template for Servisio
-
-Purpose:
-    Provides a consistent layout for all pages in the system.
-    Includes header, footer, and placeholders for content blocks.
-
-Usage:
-    All other templates (login, portal, admin pages) should extend this file.
-#} -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Servisio{% endblock %}</title>
-    <!-- Bootstrap CSS CDN (for quick styling) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     {% block head %}{% endblock %}
 </head>
 <body>
-    <!-- Header / Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Servisio</a>
+            {% if current_user.is_authenticated %}
+                {% if current_user.role == 'User' %}
+                    <a class="navbar-brand" href="{{ url_for('portal.portal_home') }}">Servisio Portal</a>
+                {% else %}
+                    <a class="navbar-brand" href="{{ url_for('home.home') }}">Servisio Admin</a>
+                {% endif %}
+            {% else %}
+                 <a class="navbar-brand" href="/">Servisio</a>
+            {% endif %}
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
                     data-bs-target="#navbarNav" aria-controls="navbarNav" 
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -32,36 +27,45 @@ Usage:
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-<<<<<<< HEAD
-                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
-                    <!-- Tickets Dropdown -->
-<li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    Tickets
-  </a>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ticketsDropdown">
-    <li><a class="dropdown-item" href="{{ url_for('incidents.list_incidents') }}">Incidents</a></li>
-    <li><a class="dropdown-item" href="{{ url_for('services.list_services') }}">Service Requests</a></li>
-  </ul>
-</li>
-                    <li class="nav-item"><a class="nav-link" href="/kb">Knowledge Base</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
-=======
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.portal_home') }}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.my_tickets') }}">Tickets</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('kb.kb_home') }}">Knowledge Base</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
->>>>>>> origin/user-portal
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'User' %}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.portal_home') }}">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.new_ticket') }}">New Ticket</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.my_tickets') }}">My Tickets</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('kb.kb_home') }}">Knowledge Base</a></li>
+                        
+                        {% elif current_user.role in ('Admin', 'Technician') %}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('home.home') }}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard.dashboard_home') }}">Dashboard</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Tickets
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="ticketsDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('incidents.list_incidents') }}">Incidents</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('services.list_services') }}">Service Requests</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('kb.kb_home') }}">Knowledge Base</a></li>
+                        {% endif %}
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout ({{ current_user.username }})</a>
+                        </li>
+
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
+                    {% endif %}
+                    
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="container mt-4">
-          <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
+          {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
           <div class="alert alert-{{ category }} alert-dismissible fade show mt-2" role="alert">
@@ -74,15 +78,11 @@ Usage:
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
     <footer class="bg-light text-center py-3 mt-4">
         <p class="mb-0">&copy; 2025 Servisio. All rights reserved.</p>
     </footer>
 
-    <!-- Bootstrap JS CDN (for interactivity) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

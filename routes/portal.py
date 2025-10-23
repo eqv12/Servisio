@@ -15,10 +15,12 @@ Responsibilities:
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, session, flash
 from services.incident_service import create_incident, get_user_incidents
 from services.kb_service import get_all_articles, search_articles
+from flask_login import login_required, current_user  # <-- IMPORT THESE
 
 portal_bp = Blueprint('portal', __name__)
 
 @portal_bp.route('/')
+@login_required
 def portal_home():
     """User dashboard with real ticket stats for the logged-in user."""
     user_id = session.get('user_id', 1)  # Replace with real session user_id
@@ -35,6 +37,7 @@ def portal_home():
     return render_template('portal/index.html', stats=stats)
 
 @portal_bp.route('/new_ticket', methods=['GET', 'POST'])
+@login_required
 def new_ticket():
     """Ticket creation page (real DB logic, robust)."""
     if request.method == 'POST':
@@ -51,6 +54,7 @@ def new_ticket():
     return render_template('portal/new_ticket.html')
 
 @portal_bp.route('/my_tickets')
+@login_required
 def my_tickets():
     """List user’s tickets (from DB), with optional search."""
     user_id = session.get('user_id', 1)
@@ -62,6 +66,7 @@ def my_tickets():
     return render_template('portal/my_tickets.html', tickets=tickets, q=q)
 
 @portal_bp.route('/closed_requests')
+@login_required
 def closed_requests():
     """List user's closed requests (status = closed)."""
     user_id = session.get('user_id', 1)
