@@ -5,8 +5,9 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-body">
+                <div class="card-body p-4 p-md-5">
                     <h2 class="card-title text-center">{{ title }}</h2>
+                    <h4 class="text-center text-muted mb-4">"{{ article.title }}"</h4>
                     
                     <form method="POST" action="" novalidate>
                         {{ form.hidden_tag() }}
@@ -45,7 +46,8 @@
                             <small class="form-text text-muted">You can use basic HTML for formatting.</small>
                         </div>
 
-                        <div class="d-grid">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('kb.view_article', article_id=article.id) }}" class="btn btn-secondary me-md-2">Cancel</a>
                             {{ form.submit(class="btn btn-primary") }}
                         </div>
                     </form>

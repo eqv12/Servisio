@@ -30,3 +30,20 @@ ROLES = {
 }
 
 # Other configurations can be added here
+
+import os
+from dotenv import load_dotenv
+
+# Find the absolute path of the root directory
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+# Load the .env file from the root directory
+load_dotenv(os.path.join(basedir, '.env'))
+
+class Config:
+    """Set Flask configuration variables from .env file."""
+    # General Config
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+    
+    # Gemini API Key
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')

@@ -54,7 +54,7 @@ def create_incident():
             category=category,
             priority=priority,
             status='Open',
-            created_by=1,  # placeholder until login integration
+            created_by=current_user.id,  # placeholder until login integration
             assigned_to=assigned_to
         )
         db.session.add(new_incident)

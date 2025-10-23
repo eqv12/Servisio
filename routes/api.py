@@ -1,19 +1,25 @@
-"""
-api.py - Shared / External API Blueprint
+from flask import Blueprint, request, jsonify
+from services.kb_service import get_rag_response # <-- IMPORT the new function
 
-Purpose:
-    Placeholder for APIs used by frontend or external services.
+# Create a Blueprint for API routes
+api_bp = Blueprint(
+    'api_bp', __name__,
+    url_prefix='/api'
+)
 
-Responsibilities:
-    - Provide endpoints for integrations
-    - Return dummy JSON for parallel frontend dev
-"""
+@api_bp.route('/chat', methods=['POST'])
+def chat():
+    """
+    Endpoint to handle chat messages from the user.
+    """
+    data = request.get_json()
+    if not data or 'message' not in data:
+        return jsonify({"error": "No message provided"}), 400
+    
+    user_message = data.get('message')
 
-from flask import Blueprint, jsonify
-
-api_bp = Blueprint('api', __name__)
-
-@api_bp.route('/status')
-def api_status():
-    """Return API status"""
-    return jsonify({"status": "API running"})
+    # Call our RAG function to get a real response from Gemini!
+    bot_reply = get_rag_response(user_message)
+    
+    # Return the bot's reply as JSON
+    return jsonify({"reply": bot_reply})

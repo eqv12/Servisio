@@ -1,11 +1,58 @@
 {% extends "base.html" %}
-{% block title %}Service Request #{{ service.id }} - Servisio{% endblock %}
+{% block title %}Service Request #{{ service.id }}{% endblock %}
 {% block content %}
-<h2>Service Request Details</h2>
-<p><strong>Title:</strong> {{ service.title }}</p>
-<p><strong>Status:</strong> {{ service.status }}</p>
-<p><strong>Status:</strong> {{ service.status }}</p>
-<p><strong>Approved By:</strong> {{ service.approver.username if service.approver else '—' }}</p>
-<p><strong>Approved At:</strong> {{ service.approved_at.strftime('%Y-%m-%d %H:%M') if service.approved_at else '—' }}</p>
+
+<h2>Service Request #{{ service.id }} — {{ service.title }}</h2>
+<p>
+  <strong>Work Status:</strong> {{ service.status }} <br>
+  <strong>Approval Status:</strong> {{ service.approval_status }}
+  {% if service.approver %}
+    (by {{ service.approver.username }})
+  {% endif %}
+</p>
+<p><strong>Type:</strong> {{ service.request_type }}</p>
+<p><strong>Description:</strong> {{ service.description }}</p>
+<p><strong>Created By:</strong> {{ service.requester.username if service.requester else '—' }}</p>
+<p><strong>Created At:</strong> {{ service.created_at.strftime('%d-%m-%y %H:%M') if service.created_at else '—' }}</p> <p><strong>Assigned Technician:</strong> {{ service.technician.username if service.technician else 'Unassigned' }}
+
+  {% if current_user.role == 'Admin' %}
+    <form action="{{ url_for('services.assign_technician', id=service.id) }}" method="POST" class="mt-2">
+      <div class="input-group" style="max-width: 350px;">
+        <select name="technician_id" class="form-select form-select-sm">
+          {% for tech in technicians %}
+            <option value="{{ tech.id }}" {{ 'selected' if service.technician and tech.id == service.technician.id else '' }}>
+              {{ tech.username }} ({{ tech.team or '—' }})
+            </option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-sm btn-outline-primary" type="submit">Reassign</button>
+      </div>
+    </form>
+  {% endif %}
+</p>
+
+<div class="d-flex align-items-center mb-4">
+  <form action="{{ url_for('services.update_service', id=service.id) }}" method="POST" class="me-3">
+    <div class="input-group input-group-sm">
+      <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="Open" {{ 'selected' if service.status == 'Open' else '' }}>Open</option>
+        <option value="In Progress" {{ 'selected' if service.status == 'In Progress' else '' }}>In Progress</option>
+        <option value="Resolved" {{ 'selected' if service.status == 'Resolved' else '' }}>Resolved</option>
+      </select>
+      <button class="btn btn-outline-primary" type="submit">Update</button>
+    </div>
+  </form>
+
+  {% if current_user.role == 'Admin' %}
+    <form action="{{ url_for('services.delete_service', id=service.id) }}" method="POST" 
+          onsubmit="return confirm('Are you sure you want to delete this service request?');">
+      <button type="submit" class="btn btn-sm btn-danger">Delete Request</button>
+    </form>
+  {% endif %}
+</div>
+<a href="{{ url_for('services.list_services') }}" class="btn btn-secondary btn-sm mb-3">← Back to Service Requests</a>
+<hr>
+
+<div class="alert alert-info">Work Note functionality to be added.</div>
 
 {% endblock %}

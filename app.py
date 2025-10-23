@@ -30,7 +30,7 @@ from routes.api import api_bp
 # from routes.portal import portal_bp
 from models import db
 # from routes.home import home_bp
-from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY
+from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, SECRET_KEY, Config
 from routes.home import home_bp
 
 # --- IMPORT FROM extensions.py ---
@@ -53,6 +53,7 @@ def create_app():
     Factory function to create and configure the Flask app.
     """
     app = Flask(__name__)
+    app.config.from_object(Config)
     app.config['SECRET_KEY'] = SECRET_KEY 
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS

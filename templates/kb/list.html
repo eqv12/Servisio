@@ -1,29 +1,30 @@
 {% extends "base.html" %}
-{% block title %}{{ category }} Articles{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 {% block content %}
-<h2 class="mb-3">{{ category }} Articles</h2>
 
-<!-- Search bar -->
-<form method="GET" action="{{ url_for('kb.kb_by_category', category=category) }}" class="d-flex mb-3 align-items-center">
-  <input type="text" name="q" value="{{ query or '' }}" class="form-control me-2" placeholder="Search articles...">
-  <button type="submit" class="btn btn-outline-primary me-2">Search</button>
-  <a href="{{ url_for('kb.kb_by_category', category=category) }}" class="btn btn-outline-secondary">Show All</a>
-</form>
+<div class="container mt-4">
+  <h2 class="mb-4">{{ title }}</h2>
 
-<div class="text-end mb-3">
-  <a href="{{ url_for('kb.create_article') }}" class="btn btn-primary btn-sm">+ New Article</a>
-</div>
-
-{% if articles %}
+  {% if articles %}
   <div class="list-group">
-    {% for a in articles %}
-      <a href="{{ url_for('kb.view_article', id=a.id) }}" class="list-group-item list-group-item-action">
-        <h5 class="mb-1">{{ a.title }}</h5>
-        <small class="text-muted">Created on {{ a.created_at.strftime('%Y-%m-%d') }}</small>
-      </a>
+    {% for article in articles %}
+    <a href="{{ url_for('kb.view_article', article_id=article.id) }}" class="list-group-item list-group-item-action flex-column align-items-start">
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">{{ article.title }}</h5>
+        <small class="text-muted">{{ article.category }}</small>
+      </div>
+      <p class="mb-1 text-muted">
+        {{ article.content | striptags | truncate(150) }}
+      </p>
+    </a>
     {% endfor %}
   </div>
-{% else %}
-  <div class="alert alert-info">No articles found{% if query %} for "{{ query }}"{% endif %}.</div>
-{% endif %}
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    No articles found matching your criteria.
+  </div>
+  {% endif %}
+
+  <a href="{{ url_for('kb.kb_home') }}" class="btn btn-secondary mt-4">&laquo; Back to Knowledge Base</a>
+</div>
 {% endblock %}

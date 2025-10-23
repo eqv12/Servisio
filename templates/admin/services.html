@@ -8,13 +8,11 @@
     <tr>
       <th>ID</th>
       <th>Title</th>
-      <th>Type</th>
-      <th>Status</th>
-      <th>Approved By</th>
-      <th>Actions</th>
-      <th>Requested By</th>
+      <th>Work Status</th>       <th>Approval Status</th> <th>Type / Category</th> <th>Created By</th>
       <th>Created At</th>
+      <th>Assigned Technician</th>
       <th>Actions</th>
+      <th>Details</th>
     </tr>
   </thead>
   <tbody>
@@ -22,42 +20,47 @@
     <tr>
       <td>{{ s.id }}</td>
       <td>{{ s.title }}</td>
-      <td>{{ s.request_type }}</td>
 
       <td>
         <form action="{{ url_for('services.update_service', id=s.id) }}" method="POST" class="d-inline">
           <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-            <option value="Pending" {{ 'selected' if s.status == 'Pending' else '' }}>Pending</option>
+            <option value="Open" {{ 'selected' if s.status == 'Open' else '' }}>Open</option>
             <option value="In Progress" {{ 'selected' if s.status == 'In Progress' else '' }}>In Progress</option>
-            <option value="Approved" {{ 'selected' if s.status == 'Approved' else '' }}>Approved</option>
             <option value="Resolved" {{ 'selected' if s.status == 'Resolved' else '' }}>Resolved</option>
           </select>
         </form>
       </td>
 
-      <td>{{ s.approver.username if s.approver else '—' }}</td>
       <td>
-        {% if s.status == 'Pending Approval' and current_user.role in ['Admin', 'Manager'] %}
-          <form action="{{ url_for('services.approve_service', id=s.id) }}" method="POST" class="d-inline">
-            <button type="submit" class="btn btn-sm btn-success">Approve</button>
-          </form>
-          <form action="{{ url_for('services.reject_service', id=s.id) }}" method="POST" class="d-inline">
-            <button type="submit" class="btn btn-sm btn-danger">Reject</button>
-          </form>
-        {% else %}
-          <span class="text-muted">—</span>
+        {{ s.approval_status }}
+        {% if s.approver %}
+          <br><small>By {{ s.approver.username }}</small>
+        {% endif %}
+
+        {% if current_user.role == 'Admin' and s.approval_status == 'Pending' %}
+          <div class="mt-2">
+            <form action="{{ url_for('services.approve_service', id=s.id) }}" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-success btn-sm">Approve</button>
+            </form>
+            <form action="{{ url_for('services.reject_service', id=s.id) }}" method="POST" class="d-inline">
+              <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+            </form>
+          </div>
         {% endif %}
       </td>
 
-
+      <td>{{ s.request_type }}</td>
       <td>{{ s.requester.username if s.requester else '—' }}</td>
-      <td>{{ s.created_at.strftime('%Y-%m-%d %H:%M') if s.created_at else '—' }}</td>
+      <td>{{ s.created_at.strftime('%d-%m-%y %H:%M') if s.created_at else '—' }}</td> <td>{{ s.technician.username if s.technician else 'Unassigned' }}</td>
 
       <td>
         <form action="{{ url_for('services.delete_service', id=s.id) }}" method="POST" class="d-inline"
               onsubmit="return confirm('Are you sure you want to delete this service request?');">
           <button type="submit" class="btn btn-sm btn-danger">Delete</button>
         </form>
+      </td>
+      <td>
+        <a href="{{ url_for('services.view_service', id=s.id) }}" class="btn btn-sm btn-outline-primary">View</a>
       </td>
     </tr>
     {% endfor %}

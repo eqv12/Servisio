@@ -9,7 +9,7 @@ Usage:
     Linked in base.html.
 */
 
-body {
+/* body {
     background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -39,4 +39,448 @@ footer {
     background-color: #f1f1f1;
     font-size: 14px;
     color: #555;
+} */
+
+
+
+/*
+style.css - Revamped Global Stylesheet for Servisio
+
+Design Goals:
+- Modern, premium look with subtle animations and gradients.
+- Focus on readability and UX for ITSM workflows.
+- Works seamlessly with Bootstrap classes.
+*/
+
+:root {
+    --primary-color: #5a4bff;
+    --secondary-color: #00c6ff;
+    --accent-color: #ff6f61;
+    --bg-gradient: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    --card-bg: rgba(255, 255, 255, 0.08);
+    --text-light: #eaeaea;
+    --text-muted: #b0b0b0;
+    --transition: all 0.3s ease;
+}
+
+body {
+    background: var(--bg-gradient);
+    color: var(--text-light);
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------------- NAVBAR ---------------- */
+
+.navbar {
+    background: rgba(20, 20, 40, 0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+}
+
+.navbar:hover {
+    background: rgba(20, 20, 60, 0.9);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--secondary-color) !important;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: var(--transition);
+}
+
+.navbar-brand:hover {
+    color: var(--accent-color) !important;
+    transform: scale(1.05);
+}
+
+/* ---------------- HEADINGS ---------------- */
+
+h1, h2, h3, h4, h5 {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--text-light);
+}
+
+h2 {
+    margin-top: 30px;
+    border-left: 4px solid var(--accent-color);
+    padding-left: 10px;
+}
+
+/* ---------------- TABLES ---------------- */
+
+.table {
+    background: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+}
+
+.table th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    transition: var(--transition);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: scale(1.01);
+}
+
+/* ---------------- BUTTONS ---------------- */
+
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: all 0.6s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--secondary-color);
+}
+
+.btn-success {
+    background: linear-gradient(90deg, #00b09b, #96c93d);
+    border: none;
+    color: white;
+}
+
+.btn-success:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #96c93d;
+}
+
+/* ---------------- CARDS ---------------- */
+
+.card {
+    background: var(--card-bg);
+    border: none;
+    border-radius: 15px;
+    color: var(--text-light);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-6px);
+}
+
+/* ---------------- FOOTER ---------------- */
+
+footer {
+    margin-top: auto;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+    padding: 15px 0;
+    backdrop-filter: blur(8px);
+    letter-spacing: 0.5px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ---------------- ANIMATIONS ---------------- */
+
+/* Subtle fade-in animation for page load */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+main, .card, .table {
+    animation: fadeInUp 0.6s ease;
+}
+
+/* Glow pulse effect for buttons */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+    70% { box-shadow: 0 0 0 10px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.btn-primary:active {
+    animation: pulse 0.8s;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+
+/*
+=========================================
+KB Article Content Container Fix (v2: Stronger Isolation)
+=========================================
+This uses `all: revert` to nuke any styles from the 
+article HTML, then re-applies a clean, safe style.
+*/
+
+.kb-article-container {
+    /* Step 1: Nuke ALL inherited styles from your dark theme. 
+    This resets everything inside this div to browser defaults.
+    */
+    all: revert;
+
+    /* Step 2: Re-apply a safe "white paper" theme. 
+    These styles will NOT be affected by your global dark mode.
+    */
+    display: block; /* Make sure it's a block element */
+    background-color: #ffffff; 
+    color: #1f2937; /* Dark text */
+    border-radius: 15px; /* Match your card style */
+    padding: 2.5rem; 
+    margin-top: 2rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    
+    /* Apply safe, basic typography */
+    font-family: 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+/* Step 3: Explicitly re-style child elements 
+so they look good on the new white background.
+*/
+
+.kb-article-container h1,
+.kb-article-container h2,
+.kb-article-container h3,
+.kb-article-container h4,
+.kb-article-container h5 {
+    color: #111827; 
+    font-family: 'Poppins', 'Segoe UI', sans-serif; 
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    /* Reset any global borders/padding */
+    border: none;
+    padding: 0;
+}
+
+.kb-article-container h1 {
+    font-size: 2.25rem;
+}
+
+.kb-article-container h2 {
+    font-size: 1.75rem;
+}
+
+.kb-article-container p {
+    color: #374151; 
+    margin-bottom: 1.25rem;
+}
+
+.kb-article-container ul,
+.kb-article-container ol {
+    padding-left: 2rem;
+    margin-bottom: 1.25rem;
+}
+
+.kb-article-container a {
+    color: var(--primary-color); /* Use your theme's primary color */
+    text-decoration: underline;
+}
+
+.kb-article-container a:hover {
+    color: #4338ca; /* A darker version of your primary */
+}
+
+/* ================================== */
+/* CHATBOT STYLES              */
+/* ================================== */
+.chat-bubble {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background-color: #007bff;
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: transform 0.2s ease-in-out;
+}
+
+.chat-bubble:hover {
+    transform: scale(1.1);
+}
+
+.chat-popup {
+    display: none; /* Initially hidden */
+    position: fixed;
+    bottom: 100px;
+    right: 25px;
+    width: 350px;
+    max-width: 90vw;
+    height: 500px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 1001;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-header {
+    background-color: #007bff;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.chat-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.chat-body {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #f4f7f9;
+}
+
+.message {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 80%;
+    line-height: 1.4;
+}
+
+.bot-message {
+    background-color: #e9eef2;
+    color: #333;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.user-message {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-footer {
+    padding: 10px;
+    display: flex;
+    border-top: 1px solid #ddd;
+    background-color: #fff;
+}
+
+#chat-input {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 10px 15px;
+    outline: none;
+}
+
+#send-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+#send-btn:hover {
+    background-color: #0056b3;
+}
+
+.typing-indicator {
+    align-self: flex-start;
+    padding: 10px 15px;
+}
+
+.typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #aaa;
+    animation: typing 1s infinite;
+    margin: 0 2px;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
 }

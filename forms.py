@@ -1,7 +1,7 @@
 # forms.py
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
 from models import User
 
@@ -31,3 +31,21 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', 
                              validators=[DataRequired()])
     submit = SubmitField('Login')
+
+class KBSearchForm(FlaskForm):
+    """Form for searching the knowledge base."""
+    query = StringField('Search', validators=[DataRequired()])
+    submit = SubmitField('Search')
+
+class ArticleForm(FlaskForm):
+    """Form for creating or editing a KB article."""
+    title = StringField('Title', validators=[DataRequired(), Length(min=5, max=150)])
+    # We will populate choices for 'category' dynamically in the route
+    category = SelectField('Category', choices=[
+        ('Hardware', 'Hardware'),
+        ('Software', 'Software'),
+        ('Network', 'Network'),
+        ('Other', 'Other')
+    ], validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Save Article')

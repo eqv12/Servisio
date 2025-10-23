@@ -83,13 +83,22 @@ class Incident(db.Model):
 
 
 
+# models.py
+
 class ServiceRequest(db.Model):
     __tablename__ = 'service_request'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
-    request_type = db.Column(db.String(50))
-    status = db.Column(db.String(50), default='Pending Approval')  # default status
+    request_type = db.Column(db.String(50)) # This is the "Category"
+
+    # --- SYNCHRONIZED FIELDS ---
+    # These fields now match the Incident model
+    status = db.Column(db.String(50), default='Open')
+    approval_status = db.Column(db.String(50), default='Pending')
+    assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    # ----------------------------
+
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     approved_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
@@ -98,8 +107,9 @@ class ServiceRequest(db.Model):
 
     requester = db.relationship('User', foreign_keys=[created_by], back_populates='service_requests')
     approver = db.relationship('User', foreign_keys=[approved_by])
-
-
+    
+    # --- ADD THIS RELATIONSHIP ---
+    technician = db.relationship('User', foreign_keys=[assigned_to])
 
 
 
