@@ -1,4 +1,49 @@
 /*
+style.css - Global Stylesheet for Servisio
+
+Purpose:
+    Provides a clean, unified design for all pages.
+    Works with Bootstrap and can be customized by the frontend team.
+
+Usage:
+    Linked in base.html.
+*/
+
+/* body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+h2 {
+    margin-top: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.table th {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-primary,
+.btn-success {
+    border-radius: 6px;
+}
+
+footer {
+    background-color: #f1f1f1;
+    font-size: 14px;
+    color: #555;
+} */
+
+
+
+/*
 style.css - Revamped Global Stylesheet for Servisio
 
 Design Goals:
@@ -7,24 +52,7 @@ Design Goals:
 - Works seamlessly with Bootstrap classes.
 */
 
-/* ================================== */
-/* LAYOUT FIX: FOOTER STAYS AT BOTTOM */
-/* ================================== */
-
-html, body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-main {
-    flex: 1;
-}
-
-/* ================================== */
-/* COLOR VARIABLES & GLOBAL THEME */
-/* ================================== */
+/* dsfwfwedrwdrwdf */
 
 :root {
     --primary-color: #5a4bff;
@@ -37,9 +65,7 @@ main {
     --transition: all 0.3s ease;
 }
 
-/* ================================== */
-/* BASE BODY STYLES */
-/* ================================== */
+
 
 body {
     background: var(--bg-gradient);
@@ -52,9 +78,7 @@ body {
     flex-direction: column;
 }
 
-/* ================================== */
-/* NAVBAR */
-/* ================================== */
+/* ---------------- NAVBAR ---------------- */
 
 .navbar {
     background: rgba(20, 20, 40, 0.8);
@@ -82,9 +106,7 @@ body {
     transform: scale(1.05);
 }
 
-/* ================================== */
-/* HEADINGS */
-/* ================================== */
+/* ---------------- HEADINGS ---------------- */
 
 h1, h2, h3, h4, h5 {
     font-weight: 600;
@@ -98,9 +120,7 @@ h2 {
     padding-left: 10px;
 }
 
-/* ================================== */
-/* TABLES */
-/* ================================== */
+/* ---------------- TABLES ---------------- */
 
 .table {
     background: var(--card-bg);
@@ -126,9 +146,7 @@ h2 {
     transform: scale(1.01);
 }
 
-/* ================================== */
-/* BUTTONS */
-/* ================================== */
+/* ---------------- BUTTONS ---------------- */
 
 .btn {
     border-radius: 10px;
@@ -175,9 +193,7 @@ h2 {
     box-shadow: 0 0 15px #96c93d;
 }
 
-/* ================================== */
-/* CARDS */
-/* ================================== */
+/* ---------------- CARDS ---------------- */
 
 .card {
     background: var(--card-bg);
@@ -193,9 +209,7 @@ h2 {
     transform: translateY(-6px);
 }
 
-/* ================================== */
-/* FOOTER */
-/* ================================== */
+/* ---------------- FOOTER ---------------- */
 
 footer {
     margin-top: auto;
@@ -207,13 +221,11 @@ footer {
     backdrop-filter: blur(8px);
     letter-spacing: 0.5px;
     border-top: 1px solid rgba(255,255,255,0.1);
-    width: 100%;
 }
 
-/* ================================== */
-/* ANIMATIONS */
-/* ================================== */
+/* ---------------- ANIMATIONS ---------------- */
 
+/* Subtle fade-in animation for page load */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -223,6 +235,7 @@ main, .card, .table {
     animation: fadeInUp 0.6s ease;
 }
 
+/* Glow pulse effect for buttons */
 @keyframes pulse {
     0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
     70% { box-shadow: 0 0 0 10px transparent; }
@@ -233,10 +246,7 @@ main, .card, .table {
     animation: pulse 0.8s;
 }
 
-/* ================================== */
-/* SCROLLBAR */
-/* ================================== */
-
+/* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -250,23 +260,41 @@ main, .card, .table {
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* ================================== */
-/* KB ARTICLE CONTAINER FIX */
-/* ================================== */
+
+/*
+=========================================
+KB Article Content Container Fix (v2: Stronger Isolation)
+=========================================
+This uses `all: revert` to nuke any styles from the 
+article HTML, then re-applies a clean, safe style.
+*/
 
 .kb-article-container {
+    /* Step 1: Nuke ALL inherited styles from your dark theme. 
+    This resets everything inside this div to browser defaults.
+    */
     all: revert;
-    display: block;
+
+    /* Step 2: Re-apply a safe "white paper" theme. 
+    These styles will NOT be affected by your global dark mode.
+    */
+    display: block; /* Make sure it's a block element */
     background-color: #ffffff; 
-    color: #1f2937;
-    border-radius: 15px;
+    color: #1f2937; /* Dark text */
+    border-radius: 15px; /* Match your card style */
     padding: 2.5rem; 
     margin-top: 2rem;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    
+    /* Apply safe, basic typography */
     font-family: 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
     font-size: 1.1rem;
     line-height: 1.7;
 }
+
+/* Step 3: Explicitly re-style child elements 
+so they look good on the new white background.
+*/
 
 .kb-article-container h1,
 .kb-article-container h2,
@@ -278,12 +306,18 @@ main, .card, .table {
     font-weight: 600;
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
+    /* Reset any global borders/padding */
     border: none;
     padding: 0;
 }
 
-.kb-article-container h1 { font-size: 2.25rem; }
-.kb-article-container h2 { font-size: 1.75rem; }
+.kb-article-container h1 {
+    font-size: 2.25rem;
+}
+
+.kb-article-container h2 {
+    font-size: 1.75rem;
+}
 
 .kb-article-container p {
     color: #374151; 
@@ -297,23 +331,20 @@ main, .card, .table {
 }
 
 .kb-article-container a {
-    color: var(--primary-color);
+    color: var(--primary-color); 
     text-decoration: underline;
 }
 
 .kb-article-container a:hover {
-    color: #4338ca;
+    color: #4338ca; 
 }
 
-/* ================================== */
-/* CHATBOT STYLES */
-/* ================================== */
 
 .chat-bubble {
     position: fixed;
     bottom: 25px;
     right: 25px;
-    background-color: var(--primary-color);
+    background-color: #007bff;
     color: white;
     width: 60px;
     height: 60px;
@@ -325,12 +356,11 @@ main, .card, .table {
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     z-index: 1000;
-    transition: transform 0.2s ease-in-out, box-shadow 0.3s ease;
+    transition: transform 0.2s ease-in-out;
 }
 
 .chat-bubble:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.3);
 }
 
 .chat-popup {
@@ -341,18 +371,17 @@ main, .card, .table {
     width: 350px;
     max-width: 90vw;
     height: 500px;
-    background: rgba(25, 25, 40, 0.85);
+    background-color: white;
     border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     z-index: 1001;
+    display: none;
     flex-direction: column;
     overflow: hidden;
-    backdrop-filter: blur(10px);
-    color: var(--text-light);
 }
 
 .chat-header {
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    background-color: #007bff;
     color: white;
     padding: 15px;
     display: flex;
@@ -382,6 +411,7 @@ main, .card, .table {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    background-color: #f4f7f9;
 }
 
 .message {
@@ -389,18 +419,17 @@ main, .card, .table {
     border-radius: 18px;
     max-width: 80%;
     line-height: 1.4;
-    word-wrap: break-word;
 }
 
 .bot-message {
-    background-color: rgba(255,255,255,0.1);
-    color: #e5e5e5;
+    background-color: #e9eef2;
+    color: #333;
     align-self: flex-start;
     border-bottom-left-radius: 4px;
 }
 
 .user-message {
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    background-color: #007bff;
     color: white;
     align-self: flex-end;
     border-bottom-right-radius: 4px;
@@ -409,34 +438,30 @@ main, .card, .table {
 .chat-footer {
     padding: 10px;
     display: flex;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.2);
+    border-top: 1px solid #ddd;
+    background-color: #fff;
 }
 
 #chat-input {
     flex-grow: 1;
-    border: 1px solid #555;
+    border: 1px solid #ccc;
     border-radius: 20px;
     padding: 10px 15px;
     outline: none;
-    background-color: rgba(255,255,255,0.1);
-    color: white;
 }
 
 #send-btn {
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 20px;
     padding: 10px 20px;
     margin-left: 10px;
     cursor: pointer;
-    transition: var(--transition);
 }
 
 #send-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 10px var(--secondary-color);
+    background-color: #0056b3;
 }
 
 .typing-indicator {
@@ -460,44 +485,4 @@ main, .card, .table {
 @keyframes typing {
     0%, 60%, 100% { transform: translateY(0); }
     30% { transform: translateY(-5px); }
-}
-
-/* ================================== */
-/* CARD TEXT FIX + BUTTON ADJUSTMENTS */
-/* ================================== */
-
-/* Description text under headings inside cards */
-.card p,
-.card small,
-.card span {
-    color: rgba(255, 255, 255, 0.85); /* lighter for readability */
-}
-
-/* Make the subtle text visible but still gentle */
-.card p {
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-
-/* “New Incident” and “New Request” button fix */
-.btn-success {
-    background: linear-gradient(90deg, #00b09b, #96c93d);
-    border: none;
-    color: white;
-    box-shadow: none; /* remove raised effect */
-}
-
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(150, 201, 61, 0.3); /* soft hover glow */
-}
-
-/* Optional: if you use .btn-primary inside these cards */
-.btn-primary {
-    box-shadow: none;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 198, 255, 0.3);
 }

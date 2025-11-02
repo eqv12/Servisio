@@ -30,3 +30,11 @@ def create_incident(title, description, priority, user_id):
 def get_user_incidents(user_id):
 	"""Get all incidents created by a specific user."""
 	return Incident.query.filter_by(created_by=user_id).order_by(Incident.created_at.desc()).all()
+
+def get_technician_incidents(technician_id):
+    """Get all incidents assigned to a specific technician."""
+    return Incident.query.filter_by(assigned_to=technician_id).order_by(Incident.created_at.desc()).all()
+
+def get_all_incidents():
+    """Get all incidents, ordered by newest first."""
+    return Incident.query.order_by(Incident.created_at.desc()).all()

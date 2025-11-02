@@ -28,7 +28,16 @@ def list_incidents():
     List all incidents from DB and render the admin template.
     """
     # Example: order by newest first
-    incidents = Incident.query.order_by(Incident.created_at.desc()).all()
+    # incidents = Incident.query.order_by(Incident.created_at.desc()).all()
+
+    if current_user.role == 'Admin':
+        incidents = Incident.query.order_by(Incident.created_at.desc()).all()
+    elif current_user.role == 'Technician':
+        incidents = Incident.query.filter_by(assigned_to=current_user.id).order_by(Incident.created_at.desc()).all()
+    else:
+        # If a 'User' role somehow gets here, deny access
+        flash("You do not have permission to access this page.", "danger")
+        return redirect(url_for('home.home')) # Or 'portal.portal_home'
 
     # Pass to template (Jinja can access model attributes directly)
     return render_template('admin/incidents.html', incidents=incidents)
