@@ -1,155 +1,118 @@
-"""
-routes/incidents.py
--------------------
-Admin / Technician Module – Incident Management
-
-Purpose:
-    Displays all incidents from the database for the admin/technician panel.
-    This is Step 3 of the Admin Module: Read Operations.
-
-Responsibilities:
-    - Query all incidents from DB
-    - Render list in admin/incidents.html
-    - Prepare for later CRUD additions (create, update, delete)
-"""
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from models import db, Incident, WorkNote, User
 from datetime import datetime
 from sqlalchemy import func
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 incidents_bp = Blueprint('incidents', __name__, url_prefix='/admin/incidents')
 
-
+# ... (list_incidents, create_incident, update_incident, delete_incident are all fine) ...
 @incidents_bp.route('/')
+@login_required
 def list_incidents():
-    """
-    List all incidents from DB and render the admin template.
-    """
-    # Example: order by newest first
-    # incidents = Incident.query.order_by(Incident.created_at.desc()).all()
-
+# ... (existing code) ...
     if current_user.role == 'Admin':
         incidents = Incident.query.order_by(Incident.created_at.desc()).all()
     elif current_user.role == 'Technician':
         incidents = Incident.query.filter_by(assigned_to=current_user.id).order_by(Incident.created_at.desc()).all()
     else:
-        # If a 'User' role somehow gets here, deny access
         flash("You do not have permission to access this page.", "danger")
-        return redirect(url_for('home.home')) # Or 'portal.portal_home'
-
-    # Pass to template (Jinja can access model attributes directly)
+        return redirect(url_for('home.home'))
     return render_template('admin/incidents.html', incidents=incidents)
 
-
-
 @incidents_bp.route('/create', methods=['GET', 'POST'])
+@login_required
 def create_incident():
+# ... (existing code) ...
+    if current_user.role not in ['Admin', 'Technician']:
+        flash("You do not have permission to perform this action.", "danger")
+        return redirect(url_for('home.home'))
     if request.method == 'POST':
         title = request.form['title']
+# ... (existing code) ...
         description = request.form['description']
         category = request.form['category']
         priority = request.form['priority']
-
-        # Find technician with matching team and lowest workload
         technician = User.query.filter_by(role='Technician', team=category).order_by(User.workload.asc()).first()
-
+# ... (existing code) ...
         assigned_to = technician.id if technician else None
-
         new_incident = Incident(
             title=title,
+# ... (existing code) ...
             description=description,
             category=category,
             priority=priority,
             status='Open',
-            created_by=current_user.id,  # placeholder until login integration
+            created_by=current_user.id, 
             assigned_to=assigned_to
         )
         db.session.add(new_incident)
-
-        # Update technician workload count
         if technician:
             technician.workload += 1
-
+# ... (existing code) ...
         db.session.commit()
-
         flash(f"Incident created successfully! Assigned to {technician.username if technician else 'No available technician.'}", "success")
         return redirect(url_for('incidents.list_incidents'))
-
     return render_template('admin/incident_create.html')
 
-
-"""
-Developer Notes:
-----------------
-- Uses simple form POST → DB insert → redirect to list page.
-- Later you’ll replace created_by=1 with current_user.id after auth setup.
-- Requires a template: templates/admin/incident_create.html
-"""
 @incidents_bp.route('/update/<int:id>', methods=['POST'])
+@login_required
 def update_incident(id):
-    """Update an incident's status"""
+# ... (existing code) ...
     incident = Incident.query.get_or_404(id)
     new_status = request.form.get('status')
-
     if new_status and new_status != incident.status:
+# ... (existing code) ...
         incident.status = new_status
         db.session.commit()
         flash(f"Incident #{id} updated to '{new_status}'.", "success")
-
     return redirect(url_for('incidents.list_incidents'))
 
-
-"""
-Developer Notes:
-----------------
-- Each row in incidents.html includes a <form> that triggers this route.
-- The 'onchange' event automatically submits the form when status changes.
-- Later you can add role-based logic to restrict updates to admins/techs.
-"""
 @incidents_bp.route('/delete/<int:id>', methods=['POST'])
+@login_required
 def delete_incident(id):
-    """Delete an incident by ID"""
+# ... (existing code) ...
+    if current_user.role != 'Admin':
+        abort(403)
     incident = Incident.query.get(id)
+# ... (existing code) ...
     if incident:
         db.session.delete(incident)
         db.session.commit()
         flash(f"Incident #{id} deleted successfully.", "success")
     else:
         flash("Incident not found.", "danger")
-
     return redirect(url_for('incidents.list_incidents'))
 
-"""
-Developer Notes:
-----------------
-- Incident model fields expected: id, title, description, status, priority, created_at, created_by
-- Add guards in template for optional fields (e.g., created_by might be None)
-- This file now returns real DB data (no dummy lists)
-"""
-
 @incidents_bp.route('/<int:id>')
+@login_required
 def view_incident(id):
     """Detailed view of an incident with work notes."""
     incident = Incident.query.get_or_404(id)
-    work_notes = WorkNote.query.filter_by(incident_id=id).order_by(WorkNote.created_at.desc()).all()
+    
+    # --- UPDATED: Use the new relationship ---
+    work_notes = incident.work_notes.order_by(WorkNote.created_at.desc()).all()
+    # -----------------------------------------
+    
     technicians = User.query.filter_by(role='Technician').all()
     return render_template('admin/incident_detail.html', incident=incident, work_notes=work_notes, technicians=technicians)
 
 
 @incidents_bp.route('/<int:id>/add_note', methods=['POST'])
+@login_required
 def add_work_note(id):
     """Add a new technician work note to an incident."""
     note_text = request.form.get('note')
-    technician_id = request.form.get('technician_id') or 2  # placeholder; integrate with login later
+    technician_id = current_user.id 
 
     if not note_text:
         flash("Work note cannot be empty.", "danger")
         return redirect(url_for('incidents.view_incident', id=id))
 
     new_note = WorkNote(
+        # --- UPDATED: Use specific foreign key ---
         incident_id=id,
+        # ---------------------------------------
         technician_id=technician_id,
         note=note_text,
         created_at=datetime.now()
@@ -160,71 +123,78 @@ def add_work_note(id):
     return redirect(url_for('incidents.view_incident', id=id))
 
 @incidents_bp.route('/assign/<int:id>', methods=['POST'])
+@login_required
 def assign_technician(id):
-    """Assign or reassign an incident to a technician."""
+# ... (existing code) ...
+    if current_user.role != 'Admin':
+        abort(403)
     incident = Incident.query.get_or_404(id)
+# ... (existing code) ...
     technician_id = request.form.get('technician_id')
 
     if not technician_id:
         flash("Please select a technician.", "warning")
+# ... (existing code) ...
         return redirect(url_for('incidents.view_incident', id=id))
 
     new_tech = User.query.get(technician_id)
     if not new_tech:
+# ... (existing code) ...
         flash("Invalid technician selected.", "danger")
         return redirect(url_for('incidents.view_incident', id=id))
 
-    # Adjust workload counters
     if incident.assigned_to and incident.assigned_to != new_tech.id:
+# ... (existing code) ...
         old_tech = User.query.get(incident.assigned_to)
         if old_tech and old_tech.workload > 0:
             old_tech.workload -= 1
     new_tech.workload += 1
 
-    # Assign and save
     incident.assigned_to = new_tech.id
+# ... (existing code) ...
     db.session.commit()
 
     flash(f"Incident reassigned to {new_tech.username}.", "success")
     return redirect(url_for('incidents.view_incident', id=id))
 
-
 @incidents_bp.route('/approve/<int:id>', methods=['POST'])
+@login_required
 def approve_incident(id):
-    """Approve an incident (Admin/Manager only)."""
-    if current_user.role not in ['Admin', 'Manager']:
+# ... (existing code) ...
+    if current_user.role != 'Admin':
         abort(403)
-
     incident = Incident.query.get_or_404(id)
+# ... (existing code) ...
     incident.approval_status = 'Approved'
     incident.approved_by = current_user.id
     incident.approved_at = datetime.now()
-    # Auto-assign technician from the same category/team
+    
     technician = User.query.filter_by(role='Technician', team=incident.category)\
-                        .order_by(User.workload.asc()).first()
+                         .order_by(User.workload.asc()).first()
+# ... (existing code) ...
     if technician:
         incident.assigned_to = technician.id
         technician.workload += 1
     db.session.commit()
 
-    db.session.commit()
-
     flash(f"Incident '{incident.title}' approved successfully!", "success")
+# ... (existing code) ...
     return redirect(url_for('incidents.view_incident', id=id))
 
-
 @incidents_bp.route('/reject/<int:id>', methods=['POST'])
+@login_required
 def reject_incident(id):
-    """Reject an incident (Admin/Manager only)."""
-    if current_user.role not in ['Admin', 'Manager']:
+# ... (existing code) ...
+    if current_user.role != 'Admin':
         abort(403)
-
     incident = Incident.query.get_or_404(id)
+# ... (existing code) ...
     incident.approval_status = 'Rejected'
     incident.approved_by = current_user.id
     incident.approved_at = datetime.now()
     db.session.commit()
 
     flash(f"Incident '{incident.title}' has been rejected.", "danger")
+# ... (existing code) ...
     return redirect(url_for('incidents.view_incident', id=id))
 

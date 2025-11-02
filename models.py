@@ -1,42 +1,25 @@
-# models.py
 """
 models.py - Database Models
-
-Purpose:
-    Define all database tables and relationships for SmartITSM.
-
-Responsibilities:
-    - User, Incident, ServiceRequest, KBArticle, TicketHistory tables
-    - Define fields, data types, relationships
-    - Provide basic helper methods (optional) for dummy data
-
-Usage:
-    Import models in routes for CRUD operations.
+...
 """
 
 from datetime import datetime
-from flask_login import UserMixin
+from flask_login import UserMixin 
 from extensions import db, bcrypt
 
 
 class User(db.Model, UserMixin):
+    # ... (Your User model is fine) ...
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
-    
-    # --- NEW FIELD: EMAIL ---
     email = db.Column(db.String(120), unique=True, nullable=False)
-    # --------------------------
-
     password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='User') 
     team = db.Column(db.String(50), nullable=True) 
     workload = db.Column(db.Integer, default=0) 
-
-    # --- NEW FIELD: APPROVAL STATUS ---
     is_active = db.Column(db.Boolean, nullable=False, default=False)
-    # ------------------------------------
-
+    
     # Relationships
     incidents_created = db.relationship('Incident', foreign_keys='Incident.created_by', backref='creator', lazy=True)
     incidents_assigned = db.relationship('Incident', foreign_keys='Incident.assigned_to', backref='technician', lazy=True)
@@ -47,15 +30,11 @@ class User(db.Model, UserMixin):
         lazy=True
     )
 
-    # --- HELPER METHODS (RESTORED) ---
     def set_password(self, password):
-        """Hashes and sets the user's password."""
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):
-        """Checks if a provided password matches the hash."""
         return bcrypt.check_password_hash(self.password_hash, password)
-    # --------------------------------
 
     def __repr__(self):
         return f"<User {self.username} ({self.role})>"
@@ -63,6 +42,7 @@ class User(db.Model, UserMixin):
 
 class Incident(db.Model):
     __tablename__ = 'incident'
+    # ... (All your Incident fields are fine) ...
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text)
@@ -72,31 +52,30 @@ class Incident(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     kb_article_id = db.Column(db.Integer, db.ForeignKey('kb_article.id'), nullable=True)
-
     approved_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
     approval_status = db.Column(db.String(50), default='Pending') 
-
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
-
+    
     kb_article = db.relationship('KBArticle')
     approver = db.relationship('User', foreign_keys=[approved_by])
-    # Note: 'creator' and 'technician' relationships are defined 
-    # back_populates in the User model.
+
+    # --- UPDATED: Simpler relationship ---
+    work_notes = db.relationship('WorkNote', backref='incident', lazy='dynamic', cascade='all, delete-orphan', foreign_keys='WorkNote.incident_id')
+    # -----------------------------------
 
 
 class ServiceRequest(db.Model):
     __tablename__ = 'service_request'
+    # ... (All your ServiceRequest fields are fine) ...
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
-    request_type = db.Column(db.String(50)) # This is the "Category"
-
+    request_type = db.Column(db.String(50)) 
     status = db.Column(db.String(50), default='Open')
     approval_status = db.Column(db.String(50), default='Pending')
     assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     approved_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
@@ -107,8 +86,13 @@ class ServiceRequest(db.Model):
     approver = db.relationship('User', foreign_keys=[approved_by])
     technician = db.relationship('User', foreign_keys=[assigned_to])
 
+    # --- UPDATED: Simpler relationship ---
+    work_notes = db.relationship('WorkNote', backref='service_request', lazy='dynamic', cascade='all, delete-orphan', foreign_keys='WorkNote.service_request_id')
+    # -------------------------------------
+
 
 class KBArticle(db.Model):
+    # ... (KBArticle model is fine) ...
     __tablename__ = 'kb_article'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
@@ -118,7 +102,8 @@ class KBArticle(db.Model):
 
 
 class TicketHistory(db.Model):
-    """History of ticket updates."""
+    # ... (TicketHistory model is fine) ...
+    __tablename__ = 'ticket_history'
     id = db.Column(db.Integer, primary_key=True)
     ticket_type = db.Column(db.String(20)) 
     ticket_id = db.Column(db.Integer, nullable=False)
@@ -130,10 +115,15 @@ class TicketHistory(db.Model):
 class WorkNote(db.Model):
     __tablename__ = 'work_note'
     id = db.Column(db.Integer, primary_key=True)
-    incident_id = db.Column(db.Integer, db.ForeignKey('incident.id'))
+    
+    # --- UPDATED: Use two specific, nullable Foreign Keys ---
+    incident_id = db.Column(db.Integer, db.ForeignKey('incident.id'), nullable=True)
+    service_request_id = db.Column(db.Integer, db.ForeignKey('service_request.id'), nullable=True)
+    # --- REMOVED: ticket_id and ticket_type ---
+    
     technician_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     note = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.now())
 
-    incident = db.relationship('Incident', backref='work_notes')
     technician = db.relationship('User')
+

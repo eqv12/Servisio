@@ -31,7 +31,19 @@
                     {% if current_user.is_authenticated %}
                         {% if current_user.role == 'User' %}
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.portal_home') }}">Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.new_ticket') }}">New Ticket</a></li>
+                            
+                            <!-- **** THIS IS THE FIX **** -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="newRequestDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    New Request
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="newRequestDropdown">
+                                    <li><a class="dropdown-item" href="{{ url_for('portal.create_incident') }}">Report an Incident</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('portal.create_service') }}">Request a Service</a></li>
+                                </ul>
+                            </li>
+                            <!-- **** END FIX **** -->
+                            
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.my_tickets') }}">My Tickets</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('kb.kb_home') }}">Knowledge Base</a></li>
                         
@@ -49,14 +61,11 @@
                             </li>
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('kb.kb_home') }}">Knowledge Base</a></li>
                             
-                            <!-- **** HERE IS THE NEW LINK FOR ADMINS **** -->
                             {% if current_user.role == 'Admin' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin.user_management') }}">User Management</a>
                             </li>
                             {% endif %}
-                            <!-- **** END NEW LINK **** -->
-
                         {% endif %}
 
                         <li class="nav-item">
@@ -199,3 +208,4 @@
     </script>
 </body>
 </html>
+

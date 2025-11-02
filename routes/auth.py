@@ -3,9 +3,9 @@ from flask_login import login_user, logout_user, current_user, login_required
 
 from extensions import db, bcrypt
 from models import User
-from forms import LoginForm, RegistrationForm
-# --- 1. IMPORT YOUR NEW EMAIL SERVICE ---
 from services.email_service import send_new_user_alert
+from forms import LoginForm, RegistrationForm, RequestResetForm, ResetPasswordForm
+from services.email_service import send_new_user_alert, send_password_reset_email
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -39,7 +39,7 @@ def login():
         else:
             flash('Login unsuccessful. Please check username and password.', 'danger')
 
-    return render_template('auth/login.html', title='Login', form=form)
+    return render_template('auth/login.html', title='Login', form=form, show_reset_link=True)
 
 @auth_bp.route('/logout')
 @login_required
@@ -83,3 +83,45 @@ def register():
         return redirect(url_for('auth.login'))
 
     return render_template('auth/register.html', title='Register', form=form)
+
+@auth_bp.route('/request_reset', methods=['GET', 'POST'])
+def request_reset():
+    """
+    Route for user to request a password reset email.
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('home.home'))
+    
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_password_reset_email(user)
+        flash('If an account with that email exists, a password reset link has been sent.', 'info')
+        return redirect(url_for('auth.login'))
+        
+    return render_template('auth/request_reset.html', title='Reset Password', form=form)
+
+
+@auth_bp.route('/reset_token/<token>', methods=['GET', 'POST'])
+def reset_token(token):
+    """
+    Route for user to enter a new password using a valid token.
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('home.home'))
+        
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash('That is an invalid or expired token.', 'warning')
+        return redirect(url_for('auth.request_reset'))
+        
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been updated! You are now able to log in.', 'success')
+        return redirect(url_for('auth.login'))
+        
+    return render_template('auth/reset_token.html', title='Reset Your Password', form=form)
+

@@ -13,7 +13,8 @@
 <p><strong>Type:</strong> {{ service.request_type }}</p>
 <p><strong>Description:</strong> {{ service.description }}</p>
 <p><strong>Created By:</strong> {{ service.requester.username if service.requester else '—' }}</p>
-<p><strong>Created At:</strong> {{ service.created_at.strftime('%d-%m-%y %H:%M') if service.created_at else '—' }}</p> <p><strong>Assigned Technician:</strong> {{ service.technician.username if service.technician else 'Unassigned' }}
+<p><strong>Created At:</strong> {{ service.created_at.strftime('%d-%m-%y %H:%M') if service.created_at else '—' }}</p>
+<p><strong>Assigned Technician:</strong> {{ service.technician.username if service.technician else 'Unassigned' }}
 
   {% if current_user.role == 'Admin' %}
     <form action="{{ url_for('services.assign_technician', id=service.id) }}" method="POST" class="mt-2">
@@ -53,6 +54,44 @@
 <a href="{{ url_for('services.list_services') }}" class="btn btn-secondary btn-sm mb-3">← Back to Service Requests</a>
 <hr>
 
-<div class="alert alert-info">Work Note functionality to be added.</div>
+<!-- **** START: WORK NOTE UI **** -->
+<h4>
+  <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#workNotes" aria-expanded="false">
+    💬 Work Notes ({{ work_notes|length }})
+  </button>
+</h4>
+<div class="collapse show" id="workNotes">
+  {% if work_notes %}
+    <ul class="list-group mb-3">
+      {% for note in work_notes %}
+        <li class="list-group-item">
+          <p class="mb-1">{{ note.note }}</p>
+          <small class="text-muted">
+            Added by {{ note.technician.username if note.technician else '—' }}
+            on {{ note.created_at.strftime('%d-%m-%y %H:%M') }}
+          </small>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info">No work notes yet.</div>
+  {% endif %}
+</div>
+
+<!-- Add Work Note Form -->
+<div class="card mt-4">
+  <div class="card-body">
+    <h5 class="card-title">Add Work Note</h5>
+    <!-- THIS ACTION MUST POINT TO THE NEW ROUTE -->
+    <form method="POST" action="{{ url_for('services.add_work_note', id=service.id) }}">
+      <div class="mb-3">
+        <textarea name="note" class="form-control" placeholder="Enter your work note..." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-success">Add Note</button>
+    </form>
+  </div>
+</div>
+<!-- **** END: WORK NOTE UI **** -->
 
 {% endblock %}
+

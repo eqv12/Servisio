@@ -1,5 +1,5 @@
 from threading import Thread
-from flask import render_template, current_app
+from flask import render_template, current_app, url_for
 from flask_mail import Message
 from extensions import mail
 
@@ -85,3 +85,23 @@ def send_ticket_assigned_email(technician, ticket):
         ticket=ticket,
         ticket_type=ticket_type
     )
+
+# --- NEW FUNCTION FOR PASSWORD RESET ---
+def send_password_reset_email(user):
+    """
+    Generates a token and sends the password reset email.
+    """
+    token = user.get_reset_token()
+    # _external=True is crucial to generate a full URL (http://...)
+    reset_link = url_for('auth.reset_token', token=token, _external=True)
+    
+    subject = "Servisio Password Reset Request"
+    
+    send_email(
+        subject,
+        [user.email],
+        'email/reset_password.html',
+        user=user,
+        reset_link=reset_link
+    )
+
