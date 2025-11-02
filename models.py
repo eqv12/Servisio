@@ -1,3 +1,4 @@
+# models.py
 """
 models.py - Database Models
 
@@ -14,7 +15,7 @@ Usage:
 """
 
 from datetime import datetime
-from flask_login import UserMixin  # <-- IMPORT THIS
+from flask_login import UserMixin
 from extensions import db, bcrypt
 
 
@@ -23,14 +24,18 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
     
-    # --- VITAL CHANGE ---
-    # Rename 'password' to 'password_hash' for clarity and security
+    # --- NEW FIELD: EMAIL ---
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    # --------------------------
+
     password_hash = db.Column(db.String(128), nullable=False)
-    # --------------------
-    
     role = db.Column(db.String(20), nullable=False, default='User') 
     team = db.Column(db.String(50), nullable=True) 
     workload = db.Column(db.Integer, default=0) 
+
+    # --- NEW FIELD: APPROVAL STATUS ---
+    is_active = db.Column(db.Boolean, nullable=False, default=False)
+    # ------------------------------------
 
     # Relationships
     incidents_created = db.relationship('Incident', foreign_keys='Incident.created_by', backref='creator', lazy=True)
@@ -42,7 +47,7 @@ class User(db.Model, UserMixin):
         lazy=True
     )
 
-    # --- ADD THESE HELPER METHODS ---
+    # --- HELPER METHODS (RESTORED) ---
     def set_password(self, password):
         """Hashes and sets the user's password."""
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -61,29 +66,25 @@ class Incident(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text)
-    category = db.Column(db.String(50))  # Network, Hardware, Software, etc.
+    category = db.Column(db.String(50)) 
     priority = db.Column(db.String(50))
     status = db.Column(db.String(50), default='Open')
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     kb_article_id = db.Column(db.Integer, db.ForeignKey('kb_article.id'), nullable=True)
 
-    # 👇 New fields
     approved_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
-    approval_status = db.Column(db.String(50), default='Pending')  # Pending / Approved / Rejected
+    approval_status = db.Column(db.String(50), default='Pending') 
 
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     kb_article = db.relationship('KBArticle')
-
-    # Relationships
     approver = db.relationship('User', foreign_keys=[approved_by])
+    # Note: 'creator' and 'technician' relationships are defined 
+    # back_populates in the User model.
 
-
-
-# models.py
 
 class ServiceRequest(db.Model):
     __tablename__ = 'service_request'
@@ -92,13 +93,10 @@ class ServiceRequest(db.Model):
     description = db.Column(db.Text)
     request_type = db.Column(db.String(50)) # This is the "Category"
 
-    # --- SYNCHRONIZED FIELDS ---
-    # These fields now match the Incident model
     status = db.Column(db.String(50), default='Open')
     approval_status = db.Column(db.String(50), default='Pending')
     assigned_to = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    # ----------------------------
-
+    
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     approved_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
@@ -107,10 +105,7 @@ class ServiceRequest(db.Model):
 
     requester = db.relationship('User', foreign_keys=[created_by], back_populates='service_requests')
     approver = db.relationship('User', foreign_keys=[approved_by])
-    
-    # --- ADD THIS RELATIONSHIP ---
     technician = db.relationship('User', foreign_keys=[assigned_to])
-
 
 
 class KBArticle(db.Model):
@@ -118,19 +113,19 @@ class KBArticle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    category = db.Column(db.String(100), nullable=False)  # e.g. "Network", "Hardware", "Software"
+    category = db.Column(db.String(100), nullable=False) 
     created_at = db.Column(db.DateTime, default=db.func.now())
-
 
 
 class TicketHistory(db.Model):
     """History of ticket updates."""
     id = db.Column(db.Integer, primary_key=True)
-    ticket_type = db.Column(db.String(20))  # Incident / ServiceRequest
+    ticket_type = db.Column(db.String(20)) 
     ticket_id = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(50))
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
 
 class WorkNote(db.Model):
     __tablename__ = 'work_note'
@@ -140,6 +135,5 @@ class WorkNote(db.Model):
     note = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.now())
 
-    # Relationships
     incident = db.relationship('Incident', backref='work_notes')
     technician = db.relationship('User')

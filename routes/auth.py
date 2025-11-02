@@ -27,6 +27,13 @@ def login():
         
         # Check if user exists and password is correct
         if user and user.check_password(form.password.data):
+            
+            # --- NEW: CHECK IF USER IS APPROVED ---
+            if not user.is_active:
+                flash('Your account is pending admin approval. Please wait for an administrator to activate it.', 'warning')
+                return redirect(url_for('auth.login'))
+            # --- END OF NEW CHECK ---
+
             login_user(user) # This is the magic!
             flash('Login successful!', 'success')
             
@@ -58,11 +65,23 @@ def register():
 
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, role=form.role.data)
+        # --- UPDATED: Add email and set is_active to False ---
+        user = User(
+            username=form.username.data, 
+            email=form.email.data,  # <-- Added email
+            role=form.role.data,
+            is_active=False  # <-- Account is inactive until approved
+        )
+        # ---------------------------------------------------
+        
         user.set_password(form.password.data) # Use our hashing method
         db.session.add(user)
         db.session.commit()
-        flash('Your account has been created! You can now log in.', 'success')
+
+        # --- UPDATED: New flash message ---
+        flash('Your account has been created and is now pending admin approval.', 'info')
+        # ----------------------------------
+        
         return redirect(url_for('auth.login'))
 
     return render_template('auth/register.html', title='Register', form=form)

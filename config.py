@@ -3,33 +3,8 @@ config.py - Application Configuration
 
 Purpose:
     Centralized configuration for SmartITSM.
-
-Responsibilities:
-    - Store secret keys, database URI, and other environment settings
-    - Define roles and permissions
-    - Provide configuration constants for use across the app
-
-Usage:
-    Import config variables into app.py or other modules as needed.
+    Loads settings from .env file into a Config class.
 """
-
-import os
-
-# Flask secret key for sessions
-SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here')
-
-# Database URI (using SQLite for development)
-SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI', 'sqlite:///servisio.db')
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-# User roles
-ROLES = {
-    'ADMIN': 'Admin',
-    'TECH': 'Technician',
-    'USER': 'User'
-}
-
-# Other configurations can be added here
 
 import os
 from dotenv import load_dotenv
@@ -37,13 +12,36 @@ from dotenv import load_dotenv
 # Find the absolute path of the root directory
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# Load the .env file from the root directory
+# Load the .env file *before* anything else
 load_dotenv(os.path.join(basedir, '.env'))
 
 class Config:
-    """Set Flask configuration variables from .env file."""
+    """Set Flask configuration variables from .env file or defaults."""
+
     # General Config
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'a-very-secret-and-hard-to-guess-key'
     
+    # Database Config
+    # Default to a sqlite db inside an 'instance' folder
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + os.path.join(basedir, 'instance', 'servisio.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
     # Gemini API Key
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+    
+    # --- NEW MAIL SETTINGS ---
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.gmail.com'
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    # Set a default sender display name
+    MAIL_DEFAULT_SENDER = ('Servisio Admin', os.environ.get('MAIL_USERNAME'))
+
+# --- CONSTANTS ---
+# (These are not config, so they can stay outside the class)
+ROLES = {
+    'ADMIN': 'Admin',
+    'TECH': 'Technician',
+    'USER': 'User'
+}
