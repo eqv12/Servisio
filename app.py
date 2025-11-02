@@ -30,6 +30,50 @@ def load_user(user_id):
     from models import User
     return User.query.get(int(user_id))
 
+# --- NEW SEEDING FUNCTION ---
+def _seed_database(app):
+    """
+    Checks if the database is empty and, if so, creates an admin account.
+    This replaces the need for seed_admin.py on Render.
+    """
+    with app.app_context():
+        # Create all tables if they don't exist
+        db.create_all()
+        
+        # Check if any users already exist.
+        if User.query.count() == 0:
+            print("Database is empty. Seeding admin account...")
+            
+            # --- SET YOUR ADMIN DETAILS HERE ---
+            ADMIN_USERNAME = 'admin'
+            ADMIN_EMAIL = 'anony3938@gmail.com' # Using the email you provided
+            ADMIN_PASSWORD = 'admin' # You can change this
+            # -----------------------------------
+
+            try:
+                # Create the new admin user
+                new_admin = User(
+                    username=ADMIN_USERNAME,
+                    email=ADMIN_EMAIL,
+                    role='Admin',
+                    is_active=True  # This is critical
+                )
+                
+                # Set the password securely
+                new_admin.set_password(ADMIN_PASSWORD)
+                
+                # Add to the database
+                db.session.add(new_admin)
+                db.session.commit()
+                
+                print(f"Admin user '{ADMIN_USERNAME}' created successfully!")
+            except Exception as e:
+                print(f"Error seeding database: {e}")
+                db.session.rollback()
+        else:
+            print("Database already contains users. Skipping seed.")
+
+
 def create_app():
     """
     Factory function to create and configure the Flask app.
@@ -74,60 +118,21 @@ def create_app():
     def index():
         return redirect(url_for('home.home'))
 
+    # --- MOVED SEEDING CALL HERE ---
+    # This block will run once when the app starts on Render.
+    _seed_database(app)
+    # -------------------------------
+
     return app
-
-# --- NEW SEEDING FUNCTION ---
-def _seed_database(app):
-    """
-    Checks if the database is empty and, if so, creates an admin account.
-    This replaces the need for seed_admin.py on Render.
-    """
-    with app.app_context():
-        # Create all tables if they don't exist
-        db.create_all()
-        
-        # Check if any users already exist.
-        if User.query.count() == 0:
-            print("Database is empty. Seeding admin account...")
-            
-            # --- SET YOUR ADMIN DETAILS HERE ---
-            ADMIN_USERNAME = 'admin'
-            ADMIN_EMAIL = 'anony3938@gmail.com' # Using the email you provided
-            ADMIN_PASSWORD = 'admin' # You can change this
-            # -----------------------------------
-
-            try:
-                # Create the new admin user
-                new_admin = User(
-                    username=ADMIN_USERNAME,
-                    email=ADMIN_EMAIL,
-                    role='Admin',
-                    is_active=True  # This is critical
-                )
-                
-                # Set the password securely
-                new_admin.set_password(ADMIN_PASSWORD)
-                
-                # Add to the database
-                db.session.add(new_admin)
-                db.session.commit()
-                
-                print(f"Admin user '{ADMIN_USERNAME}' created successfully!")
-            except Exception as e:
-                print(f"Error seeding database: {e}")
-                db.session.rollback()
-        else:
-            print("Database already contains users. Skipping seed.")
 
 # --- UPDATED MAIN RUN BLOCK ---
 if __name__ == '__main__':
     app = create_app()
     
-    # --- SEED THE DATABASE (for Render free tier) ---
-    # This block will run when you start the app
-    # It creates tables AND seeds the admin user if needed.
-    _seed_database(app)
-    # ------------------------------------------------
+    # We can leave db.create_all() here for local development,
+    # but the seed function already handles it.
+    with app.app_context():
+        db.create_all() 
         
     app.run(debug=True)
 
