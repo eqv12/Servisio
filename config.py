@@ -21,9 +21,21 @@ class Config:
     # General Config
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a-very-secret-and-hard-to-guess-key'
     
-    # Database Config
-    # Default to a sqlite db inside an 'instance' folder
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + os.path.join(basedir, 'instance', 'servisio.db')
+    # # Database Config
+    # # Default to a sqlite db inside an 'instance' folder
+    # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + os.path.join(basedir, 'instance', 'servisio.db')
+    # SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # --- DATABASE CONFIGURATION ---
+    # Get the Database URL from the environment (Render will provide this)
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    
+    # A common "gotcha": SQLAlchemy 1.4+ needs 'postgresql://'
+    # but Render (and Heroku) provide 'postgres://'. This fixes it.
+    if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL or 'sqlite:///servisio.db' # Fallback to SQLite
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Gemini API Key
