@@ -1,15 +1,10 @@
-"""
-models.py - Database Models
-...
-"""
-
 from datetime import datetime
-from flask_login import UserMixin 
-from extensions import db, bcrypt
-
+from flask_login import UserMixin
+from extensions import db, bcrypt # <-- This is the CORRECT import
+from flask import current_app
+from itsdangerous import URLSafeTimedSerializer as Serializer
 
 class User(db.Model, UserMixin):
-    # ... (Your User model is fine) ...
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
@@ -31,10 +26,27 @@ class User(db.Model, UserMixin):
     )
 
     def set_password(self, password):
+        """Hashes and sets the user's password."""
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):
+        """Checks if a provided password matches the hash."""
         return bcrypt.check_password_hash(self.password_hash, password)
+
+    def get_reset_token(self, expires_sec=1800):
+        """Generates a secure token for password reset."""
+        s = Serializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+
+    @staticmethod
+    def verify_reset_token(token):
+        """Verifies the reset token and returns the user."""
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, max_age=1800)['user_id']
+        except:
+            return None
+        return User.query.get(user_id)
 
     def __repr__(self):
         return f"<User {self.username} ({self.role})>"
@@ -42,7 +54,6 @@ class User(db.Model, UserMixin):
 
 class Incident(db.Model):
     __tablename__ = 'incident'
-    # ... (All your Incident fields are fine) ...
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text)
@@ -61,14 +72,13 @@ class Incident(db.Model):
     kb_article = db.relationship('KBArticle')
     approver = db.relationship('User', foreign_keys=[approved_by])
 
-    # --- UPDATED: Simpler relationship ---
+    # --- Corrected WorkNote Relationship ---
     work_notes = db.relationship('WorkNote', backref='incident', lazy='dynamic', cascade='all, delete-orphan', foreign_keys='WorkNote.incident_id')
-    # -----------------------------------
+    # ---------------------------------------
 
 
 class ServiceRequest(db.Model):
     __tablename__ = 'service_request'
-    # ... (All your ServiceRequest fields are fine) ...
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
@@ -86,13 +96,12 @@ class ServiceRequest(db.Model):
     approver = db.relationship('User', foreign_keys=[approved_by])
     technician = db.relationship('User', foreign_keys=[assigned_to])
 
-    # --- UPDATED: Simpler relationship ---
+    # --- Corrected WorkNote Relationship ---
     work_notes = db.relationship('WorkNote', backref='service_request', lazy='dynamic', cascade='all, delete-orphan', foreign_keys='WorkNote.service_request_id')
-    # -------------------------------------
+    # ---------------------------------------
 
 
 class KBArticle(db.Model):
-    # ... (KBArticle model is fine) ...
     __tablename__ = 'kb_article'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
@@ -102,7 +111,6 @@ class KBArticle(db.Model):
 
 
 class TicketHistory(db.Model):
-    # ... (TicketHistory model is fine) ...
     __tablename__ = 'ticket_history'
     id = db.Column(db.Integer, primary_key=True)
     ticket_type = db.Column(db.String(20)) 
@@ -116,10 +124,10 @@ class WorkNote(db.Model):
     __tablename__ = 'work_note'
     id = db.Column(db.Integer, primary_key=True)
     
-    # --- UPDATED: Use two specific, nullable Foreign Keys ---
+    # --- Corrected Foreign Keys ---
     incident_id = db.Column(db.Integer, db.ForeignKey('incident.id'), nullable=True)
     service_request_id = db.Column(db.Integer, db.ForeignKey('service_request.id'), nullable=True)
-    # --- REMOVED: ticket_id and ticket_type ---
+    # ------------------------------
     
     technician_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     note = db.Column(db.Text, nullable=False)

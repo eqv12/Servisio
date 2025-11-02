@@ -3,22 +3,29 @@
 {% block content %}
 
 <div class="container mt-4">
-  <h2 class="mb-4">{{ title }}</h2>
+  <!-- FIX 1: Added text-light -->
+  <h2 class="mb-4 text-light">{{ title }}</h2>
 
   {% if articles %}
-  <div class="list-group">
+    <!-- FIX 2: Replaced list-group with simple card loop -->
     {% for article in articles %}
-    <a href="{{ url_for('kb.view_article', article_id=article.id) }}" class="list-group-item list-group-item-action flex-column align-items-start">
-      <div class="d-flex w-100 justify-content-between">
-        <h5 class="mb-1">{{ article.title }}</h5>
-        <small class="text-muted">{{ article.category }}</small>
+    <div class="card mb-3">
+      <div class="card-body">
+        <a href="{{ url_for('kb.view_article', article_id=article.id) }}" class="text-decoration-none">
+          <div class="d-flex w-100 justify-content-between">
+            <!-- FIX 3: Added text-light -->
+            <h5 class="mb-1 text-light">{{ article.title }}</h5>
+            <!-- FIX 4: Replaced text-muted with text-light -->
+            <small class="text-light">{{ article.category }}</small>
+          </div>
+          <!-- FIX 5: Replaced text-muted with text-light -->
+          <p class="mb-1 text-light">
+            {{ article.content | striptags | truncate(150) }}
+          </p>
+        </a>
       </div>
-      <p class="mb-1 text-muted">
-        {{ article.content | striptags | truncate(150) }}
-      </p>
-    </a>
+    </div>
     {% endfor %}
-  </div>
   {% else %}
   <div class="alert alert-info" role="alert">
     No articles found matching your criteria.

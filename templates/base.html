@@ -13,11 +13,13 @@
             {% if current_user.is_authenticated %}
                 {% if current_user.role == 'User' %}
                     <a class="navbar-brand" href="{{ url_for('portal.portal_home') }}">Servisio Portal</a>
+                {% elif current_user.role == 'Technician' %}
+                    <a class="navbar-brand" href="{{ url_for('home.home') }}">Servisio Technician</a>
                 {% else %}
                     <a class="navbar-brand" href="{{ url_for('home.home') }}">Servisio Admin</a>
                 {% endif %}
             {% else %}
-                 <a class="navbar-brand" href="/">Servisio</a>
+                <a class="navbar-brand" href="/">Servisio</a>
             {% endif %}
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
@@ -30,7 +32,7 @@
                     
                     {% if current_user.is_authenticated %}
                         {% if current_user.role == 'User' %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.portal_home') }}">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('portal.portal_home') }}">Analytics</a></li>
                             
                             <!-- **** THIS IS THE FIX **** -->
                             <li class="nav-item dropdown">
@@ -49,7 +51,7 @@
                         
                         {% elif current_user.role in ('Admin', 'Technician') %}
                             <li class="nav-item"><a class="nav-link" href="{{ url_for('home.home') }}">Home</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard.dashboard_home') }}">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard.dashboard_home') }}">Analytics</a></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Tickets

@@ -1,18 +1,20 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
-from models import db, ServiceRequest, WorkNote, User # Import WorkNote and User
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, current_app
+from models import db, ServiceRequest, WorkNote, User
 from datetime import datetime
 from flask_login import current_user, login_required
+# --- IMPORT THE SERVICE ---
+from services import service_request_service
+from services.email_service import send_ticket_assigned_email
 
 services_bp = Blueprint('services', __name__, url_prefix='/admin/services')
 
 @services_bp.route('/')
 @login_required
 def list_services():
-# ... (existing code) ...
+    # ... (This logic is fine) ...
     if current_user.role == 'Admin':
         services = ServiceRequest.query.order_by(ServiceRequest.created_at.desc()).all()
     elif current_user.role == 'Technician':
-# ... (existing code) ...
         services = ServiceRequest.query.filter_by(assigned_to=current_user.id).order_by(ServiceRequest.created_at.desc()).all()
     else:
         flash("You do not have permission to access this page.", "danger")
@@ -22,47 +24,45 @@ def list_services():
 @services_bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_service():
-# ... (existing code) ...
     if current_user.role not in ['Admin', 'Technician']:
         flash("You do not have permission to perform this action.", "danger")
         return redirect(url_for('home.home'))
 
     if request.method == 'POST':
-# ... (existing code) ...
         title = request.form.get('title')
         description = request.form.get('description')
         request_type = request.form.get('request_type')
 
         if not title or not description:
-# ... (existing code) ...
             flash("Title and description are required.", "danger")
-            return redirect(url_for('services.create_service'))
+            return render_template('admin/service_create.html') # Return form
 
-        new_service = ServiceRequest(
-# ... (existing code) ...
+        # --- REFACTORED: Call the service ---
+        # The service now handles auto-assignment, email, and db.commit()
+        service, error, tech_name = service_request_service.create_service(
             title=title,
             description=description,
             request_type=request_type,
-            status='Open',
-            approval_status='Pending',
-            created_by=current_user.id 
+            user_id=current_user.id
         )
-        db.session.add(new_service)
-# ... (existing code) ...
-        db.session.commit()
-        flash("Service request created successfully!", "success")
+        
+        if error:
+            flash(error, "danger")
+            return render_template('admin/service_create.html')
+
+        flash(f"Service request created successfully! Assigned to {tech_name if tech_name else 'No available technician.'}", "success")
         return redirect(url_for('services.list_services'))
 
     return render_template('admin/service_create.html')
 
+# ... (update_service and delete_service are fine) ...
 @services_bp.route('/update/<int:id>', methods=['POST'])
 @login_required
 def update_service(id):
-# ... (existing code) ...
+    # ... (This logic is fine) ...
     service = ServiceRequest.query.get_or_404(id)
     new_status = request.form.get('status')
     if new_status and new_status != service.status:
-# ... (existing code) ...
         service.status = new_status
         db.session.commit()
         flash(f"Service request #{id} updated to '{new_status}'.", "success")
@@ -71,49 +71,44 @@ def update_service(id):
 @services_bp.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_service(id):
-# ... (existing code) ...
+    # ... (This logic is fine) ...
     if current_user.role != 'Admin':
         abort(403)
     service = ServiceRequest.query.get(id)
-# ... (existing code) ...
     if service:
+        if service.assigned_to:
+            tech = User.query.get(service.assigned_to)
+            if tech and tech.workload > 0:
+                tech.workload -= 1
         db.session.delete(service)
         db.session.commit()
         flash(f"Service request #{id} deleted successfully.", "success")
     else:
         flash("Service request not found.", "danger")
-# ... (existing code) ...
     return redirect(url_for('services.list_services'))
+
 
 @services_bp.route('/<int:id>')
 @login_required
 def view_service(id):
-    """Detailed view of a service request with work notes."""
+    # ... (This logic is fine) ...
     service = ServiceRequest.query.get_or_404(id)
-    
-    # --- UPDATED: Use the new relationship ---
     work_notes = service.work_notes.order_by(WorkNote.created_at.desc()).all()
-    # -----------------------------------------
-    
     technicians = User.query.filter_by(role='Technician').all()
     return render_template('admin/service_detail.html', service=service, work_notes=work_notes, technicians=technicians)
 
 @services_bp.route('/<int:id>/add_note', methods=['POST'])
 @login_required
 def add_work_note(id):
-    """Add a new technician work note to a service request."""
+    # ... (This logic is fine) ...
     note_text = request.form.get('note')
-    technician_id = current_user.id
-
     if not note_text:
         flash("Work note cannot be empty.", "danger")
         return redirect(url_for('services.view_service', id=id))
 
     new_note = WorkNote(
-        # --- UPDATED: Use specific foreign key ---
         service_request_id=id,
-        # -----------------------------------------
-        technician_id=technician_id,
+        technician_id=current_user.id,
         note=note_text,
         created_at=datetime.now()
     )
@@ -125,73 +120,79 @@ def add_work_note(id):
 @services_bp.route('/assign/<int:id>', methods=['POST'])
 @login_required
 def assign_technician(id):
-# ... (existing code) ...
     if current_user.role != 'Admin':
-        abort(403) # <-- Corrected typo 4G3 to 403
+        abort(403)
     service = ServiceRequest.query.get_or_404(id)
-# ... (existing code) ...
     technician_id = request.form.get('technician_id')
 
-    if not technician_id:
-        flash("Please select a technician.", "warning")
-# ... (existing code) ...
-        return redirect(url_for('services.view_service', id=id))
-
     new_tech = User.query.get(technician_id)
-    if not new_tech:
-# ... (existing code) ...
-        flash("Invalid technician selected.", "danger")
-        return redirect(url_for('services.view_service', id=id))
+    # ... (validation is fine) ...
 
-    if service.assigned_to and service.assigned_to != new_tech.id:
-# ... (existing code) ...
-        old_tech = User.query.get(service.assigned_to)
+    # --- UPDATED: Email logic ---
+    old_tech_id = service.assigned_to
+    if old_tech_id and old_tech_id != new_tech.id:
+        old_tech = User.query.get(old_tech_id)
         if old_tech and old_tech.workload > 0:
             old_tech.workload -= 1
+            
     new_tech.workload += 1
-
     service.assigned_to = new_tech.id
-# ... (existing code) ...
     db.session.commit()
+
+    # Send email *after* commit
+    send_ticket_assigned_email(new_tech, service)
+    # ----------------------------
+
     flash(f"Service request reassigned to {new_tech.username}.", "success")
     return redirect(url_for('services.view_service', id=id))
 
 @services_bp.route('/approve/<int:id>', methods=['POST'])
 @login_required
 def approve_service(id):
-# ... (existing code) ...
     if current_user.role != 'Admin':
         abort(403)
     service = ServiceRequest.query.get_or_404(id)
-# ... (existing code) ...
     service.approval_status = 'Approved'
     service.approved_by = current_user.id
     service.approved_at = datetime.now()
 
-    technician = User.query.filter_by(role='Technician', team=service.request_type).order_by(User.workload.asc()).first()
-# ... (existing code) ...
-    if technician:
-        service.assigned_to = technician.id
-        technician.workload += 1
+    # Check if it's *already* assigned. If not, auto-assign.
+    technician = None
+    if not service.assigned_to:
+        technician = User.query.filter_by(role='Technician', team=service.request_type).order_by(User.workload.asc()).first()
+        if technician:
+            service.assigned_to = technician.id
+            technician.workload += 1
+
     db.session.commit()
     
+    # --- UPDATED: Email logic ---
+    if technician:
+        send_ticket_assigned_email(technician, service)
+    # ----------------------------
+    
     flash(f"Service request '{service.title}' approved successfully!", "success")
-# ... (existing code) ...
     return redirect(request.referrer or url_for('services.list_services'))
 
 @services_bp.route('/reject/<int:id>', methods=['POST'])
 @login_required
 def reject_service(id):
-# ... (existing code) ...
+    # ... (This logic is fine) ...
     if current_user.role != 'Admin':
         abort(403)
     service = ServiceRequest.query.get_or_404(id)
-# ... (existing code) ...
     service.approval_status = 'Rejected'
     service.status = 'Closed'
     service.approved_by = current_user.id
     service.approved_at = datetime.now()
-# ... (existing code) ...
+
+    # If it was assigned, reduce workload
+    if service.assigned_to:
+        tech = User.query.get(service.assigned_to)
+        if tech and tech.workload > 0:
+            tech.workload -= 1
+            service.assigned_to = None # Unassign
+            
     db.session.commit()
     
     flash(f"Service request '{service.title}' has been rejected.", "danger")

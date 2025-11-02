@@ -5,8 +5,10 @@
 <div class="container py-4">
   <div class="row justify-content-center">
     <div class="col-md-8 text-center">
-      <h1 class="mb-3">Knowledge Base</h1>
-      <p class="lead text-muted">Find answers, articles, and solutions to common problems.</p>
+      <!-- FIX 1: Added text-light -->
+      <h1 class="mb-3 text-light">Knowledge Base</h1>
+      <!-- FIX 2: Replaced text-muted with text-light -->
+      <p class="lead text-light">Find answers, articles, and solutions to common problems.</p>
       
       {% if current_user.role in ('Admin', 'Technician') %}
       <div class="my-4">
@@ -24,22 +26,28 @@
     </div>
   </div>
 
-  <h3 class="text-center mb-4">Browse by Category</h3>
+  <!-- FIX 3: Added text-light -->
+  <h3 class="text-center mb-4 text-light">Browse by Category</h3>
   
   <div class="row g-4">
     {% for category in categories %}
     <div class="col-md-4">
       <div class="card h-100 shadow-sm border-0">
+        <!-- FIX 4: Added d-flex flex-column for alignment -->
         <div class="card-body text-center d-flex flex-column">
-          <h5 class="card-title">{{ category }}</h5>
-          <p class="card-text text-muted">Find articles related to {{ category }}.</p>
-          <a href="{{ url_for('kb.view_category', category_name=category) }}" class="btn btn-outline-primary mt-auto">View {{ category }}</a>
+          <!-- FIX 5: Added text-light -->
+          <h5 class="card-title text-light">{{ category }}</h5>
+          <!-- FIX 6: Replaced text-muted with text-light -->
+          <p class="card-text text-light">Find articles related to {{ category }}.</p>
+          <!-- FIX 7: Added mt-auto for alignment and changed button style -->
+          <a href="{{ url_for('kb.view_category', category_name=category) }}" class="btn btn-primary mt-auto">View {{ category }}</a>
         </div>
       </div>
     </div>
     {% else %}
     <div class="col-12">
-      <p class="text-center text-muted">No categories found. Start by creating an article!</p>
+      <!-- FIX 8: Replaced text-muted with text-light -->
+      <p class="text-center text-light">No categories found. Start by creating an article!</p>
     </div>
     {% endfor %}
   </div>

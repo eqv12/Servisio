@@ -10,10 +10,13 @@
     <!-- Incidents -->
     <div class="col-md-4">
       <div class="card shadow-sm h-100 text-center border-0">
-        <div class="card-body">
+        <!-- Add d-flex flex-column -->
+        <div class="card-body d-flex flex-column"> 
           <h4 class="card-title mb-3">🧾 Incidents</h4>
-          <p class="card-text text-muted">Manage, view, or report IT issues that need attention.</p>
-          <a href="/admin/incidents" class="btn btn-outline-primary w-100">Go to Incidents</a>
+          <!-- Remove text-muted, add text-light -->
+          <p class="card-text text-light">Manage, view, or report IT issues that need attention.</p>
+          <!-- Add mt-auto -->
+          <a href="{{ url_for('incidents.list_incidents') }}" class="btn btn-outline-primary w-100 mt-auto">Go to Incidents</a>
         </div>
       </div>
     </div>
@@ -21,10 +24,13 @@
     <!-- Service Requests -->
     <div class="col-md-4">
       <div class="card shadow-sm h-100 text-center border-0">
-        <div class="card-body">
+        <!-- Add d-flex flex-column -->
+        <div class="card-body d-flex flex-column">
           <h4 class="card-title mb-3">🧰 Service Requests</h4>
-          <p class="card-text text-muted">Submit or approve service-related requests and track progress.</p>
-          <a href="/admin/services" class="btn btn-outline-primary w-100">Go to Service Requests</a>
+          <!-- Remove text-muted, add text-light -->
+          <p class="card-text text-light">Submit or approve service-related requests and track progress.</p>
+          <!-- Add mt-auto -->
+          <a href="{{ url_for('services.list_services') }}" class="btn btn-outline-primary w-100 mt-auto">Go to Service Requests</a>
         </div>
       </div>
     </div>
@@ -32,10 +38,13 @@
     <!-- Knowledge Base -->
     <div class="col-md-4">
       <div class="card shadow-sm h-100 text-center border-0">
-        <div class="card-body">
+        <!-- Add d-flex flex-column -->
+        <div class="card-body d-flex flex-column">
           <h4 class="card-title mb-3">📚 Knowledge Base</h4>
-          <p class="card-text text-muted">Search and browse solutions for common IT problems.</p>
-          <a href="/kb" class="btn btn-outline-primary w-100">Browse KB</a>
+          <!-- Remove text-muted, add text-light -->
+          <p class="card-text text-light">Search and browse solutions for common IT problems.</p>
+          <!-- Add mt-auto -->
+          <a href="{{ url_for('kb.kb_home') }}" class="btn btn-outline-primary w-100 mt-auto">Browse KB</a>
         </div>
       </div>
     </div>
@@ -43,10 +52,13 @@
     <!-- Dashboard / Analytics -->
     <div class="col-md-4">
       <div class="card shadow-sm h-100 text-center border-0">
-        <div class="card-body">
+        <!-- Add d-flex flex-column -->
+        <div class="card-body d-flex flex-column">
           <h4 class="card-title mb-3">📊 Analytics Dashboard</h4>
-          <p class="card-text text-muted">Visual insights into incidents, services, and workloads.</p>
-          <a href="/admin/dashboard" class="btn btn-outline-primary w-100">View Dashboard</a>
+          <!-- Remove text-muted, add text-light -->
+          <p class="card-text text-light">Visual insights into incidents, services, and workloads.</p>
+          <!-- Add mt-auto -->
+          <a href="{{ url_for('dashboard.dashboard_home') }}" class="btn btn-outline-primary w-100 mt-auto">View Dashboard</a>
         </div>
       </div>
     </div>
@@ -54,10 +66,13 @@
     <!-- Create Incident -->
     <div class="col-md-4">
       <div class="card shadow-sm h-100 text-center border-0">
-        <div class="card-body">
+        <!-- Add d-flex flex-column -->
+        <div class="card-body d-flex flex-column">
           <h4 class="card-title mb-3">➕ Create Incident</h4>
-          <p class="card-text text-muted">Report a new issue or outage directly from here.</p>
-          <a href="/admin/incidents/create" class="btn btn-success w-100">New Incident</a>
+          <!-- Remove text-muted, add text-light -->
+          <p class="card-text text-light">Report a new issue or outage directly from here.</p>
+          <!-- Add mt-auto -->
+          <a href="{{ url_for('incidents.create_incident') }}" class="btn btn-success w-100 mt-auto">New Incident</a>
         </div>
       </div>
     </div>
@@ -65,10 +80,13 @@
     <!-- Create Service Request -->
     <div class="col-md-4">
       <div class="card shadow-sm h-100 text-center border-0">
-        <div class="card-body">
+        <!-- Add d-flex flex-column -->
+        <div class="card-body d-flex flex-column">
           <h4 class="card-title mb-3">📝 Create Service Request</h4>
-          <p class="card-text text-muted">Request hardware, software, or any IT-related service.</p>
-          <a href="/admin/services/create" class="btn btn-success w-100">New Request</a>
+          <!-- Remove text-muted, add text-light -->
+          <p class="card-text text-light">Request hardware, software, or any IT-related service.</p>
+          <!-- Add mt-auto -->
+          <a href="{{ url_for('services.create_service') }}" class="btn btn-success w-100 mt-auto">New Request</a>
         </div>
       </div>
     </div>

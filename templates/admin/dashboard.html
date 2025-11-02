@@ -3,12 +3,13 @@
 {% block content %}
 
 <div class="container mt-4">
-  <h2 class="mb-4">{{ current_user.role }} Dashboard</h2>
+  <h2 class="mb-4">{{ current_user.role }} Analytics</h2>
 
   <!-- Stats Cards -->
+  <!-- These color cards are fine, but we'll add h-100 for consistency -->
   <div class="row text-center mb-4">
     <div class="col-md-3">
-      <div class="card bg-primary text-white shadow-sm">
+      <div class="card bg-primary text-white shadow-sm h-100">
         <div class="card-body">
           <h5>Total Tickets</h5>
           <h2>{{ stats.total_tickets }}</h2>
@@ -16,7 +17,7 @@
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card bg-warning text-dark shadow-sm">
+      <div class="card bg-warning text-dark shadow-sm h-100">
         <div class="card-body">
           <h5>Open / Pending</h5>
           <h2>{{ stats.open_tickets }}</h2>
@@ -24,7 +25,7 @@
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card bg-success text-white shadow-sm">
+      <div class="card bg-success text-white shadow-sm h-100">
         <div class="card-body">
           <h5>Resolved</h5>
           <h2>{{ stats.resolved_tickets }}</h2>
@@ -32,7 +33,7 @@
       </div>
     </div>
     <div class="col-md-3">
-      <div class="card bg-info text-white shadow-sm">
+      <div class="card bg-info text-white shadow-sm h-100">
         <div class="card-body">
           <h5>Avg Resolution Time</h5>
           <h2>{{ stats.avg_resolution_time }}</h2>
@@ -44,18 +45,20 @@
   <!-- Charts -->
   <div class="row">
     <div class="col-md-6">
-      <div class="card mb-4">
+      <div class="card mb-4"> <!-- This card uses your CSS .card style -->
         <div class="card-body">
-          <h5 class="card-title text-center">Incident Status Distribution</h5>
+          <!-- **** FIX 1: Added text-light **** -->
+          <h5 class="card-title text-center text-light">Incident Status Distribution</h5>
           <canvas id="incidentChart" height="150"></canvas>
         </div>
       </div>
     </div>
 
     <div class="col-md-6">
-      <div class="card mb-4">
+      <div class="card mb-4"> <!-- This card uses your CSS .card style -->
         <div class="card-body">
-          <h5 class="card-title text-center">Service Request Status Distribution</h5>
+          <!-- **** FIX 2: Added text-light **** -->
+          <h5 class="card-title text-center text-light">Service Request Status Distribution</h5>
           <canvas id="serviceChart" height="150"></canvas>
         </div>
       </div>
@@ -68,6 +71,10 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  // Get the light text color from your CSS
+  // (Using #eaeaea directly as JS can't easily read CSS vars)
+  const chartTextColor = '#eaeaea'; 
+
   const incidentCtx = document.getElementById('incidentChart');
   const serviceCtx = document.getElementById('serviceChart');
 
@@ -77,13 +84,19 @@
       labels: [],
       datasets: [{
         data: [],
-        backgroundColor: ['#0d6efd', '#ffc107', '#198754']
+        backgroundColor: ['#0d6efd', '#ffc107', '#198754', '#dc3545'] // Added red for pending
       }]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'bottom' }
+        legend: { 
+          position: 'bottom',
+          // **** FIX 3: Set legend text color ****
+          labels: {
+            color: chartTextColor
+          }
+        }
       }
     }
   });
@@ -100,7 +113,13 @@
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'bottom' }
+        legend: { 
+          position: 'bottom',
+          // **** FIX 4: Set legend text color ****
+          labels: {
+            color: chartTextColor
+          }
+        }
       }
     }
   });
